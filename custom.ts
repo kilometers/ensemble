@@ -70,7 +70,7 @@ namespace ensemble {
      /**
      * On MIDI Note Off
      */
-    //% block="on note $button off"
+    //% block="on note $note off"
     export function onNoteOff(note: NoteVal, handler: () => void): void {
         handler();
     }
