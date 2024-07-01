@@ -45,24 +45,36 @@ namespace ensemble {
     }
 
     enum NoteVal {
-        _35_,
-        _36_,
-        _37_,
-        _38_,
-        _39_,
-        _40_,
-        _41_,
-        _42_,
-        _43_,
-        _44_,
-        _45_,
-        _46_
+        //% block="35"
+        _35,
+        //% block="36"
+        _36,
+        //% block="37"
+        _37,
+        //% block="38"
+        _38,
+        //% block="39"
+        _39,
+        //% block="40"
+        _40,
+        //% block="41"
+        _41,
+        //% block="42"
+        _42,
+        //% block="43"
+        _43,
+        //% block="44"
+        _44,
+        //% block="45"
+        _45,
+        //% block="46"
+        _46
     }
 
     /**
      * On MIDI Note On
      */
-    //% block="on note $button on"
+    //% block="on note $note on"
     export function onNoteOn(note: NoteVal, handler: () => void): void {
         handler();
     }
