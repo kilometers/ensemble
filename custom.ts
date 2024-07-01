@@ -83,7 +83,7 @@ namespace ensemble {
      * On MIDI Note Off
      */
     //% block="on note $note off"
-    //% myEnum.shadow="dropdown"
+    //% note.shadow="dropdown"
     export function onNoteOff(note: NoteVal, handler: () => void): void {
         handler();
     }
