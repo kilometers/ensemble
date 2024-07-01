@@ -1,5 +1,5 @@
 {
-    "name": "MIDI serial to radio",
+    "name": "ensemble",
     "description": "",
     "dependencies": {
         "core": "*",
@@ -9,7 +9,8 @@
     "files": [
         "main.blocks",
         "main.ts",
-        "README.md"
+        "README.md",
+        "custom.ts"
     ],
     "testFiles": [
         "test.ts"

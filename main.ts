@@ -1,11 +1,11 @@
 serial.onDataReceived(serial.delimiters(Delimiters.NewLine), function () {
     // add midi messages from (read newline) to [messages]
     msg = serial.readLine().split(",")
-    if (+msg[0] > 248) {
+    if (msg[0] > 248) {
         messages.push({
             command: +msg[0]
         })
-    } else if (+msg[0] == 248) {
+    } else if (msg[0] == 248) {
         brightness = 255
     } else {
         let command = (+msg[0] >> 4) & 0x0F;
@@ -24,7 +24,6 @@ let messages: MidiMessage[] = []
 let pulses: number[] = []
 let systemCommand = false
 let msg: string[] = []
-
 namespace ensemble {
     enum ChannelBand {
         Albatross = 1,
