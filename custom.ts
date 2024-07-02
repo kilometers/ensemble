@@ -1,3 +1,21 @@
+enum ChannelBand {
+    Albatross = 0,
+    Bananaquit = 1,
+    Cassowary = 2,
+    Dotterel = 3,
+    Emu = 4,
+    Finch = 5,
+    Garganey = 6,
+    Hoatzin = 7,
+    Ibisbill = 8,
+    Killdeer = 9,
+    Lyrebird = 10,
+    Martin = 11,
+    Nightingale = 12,
+    Osprey = 13,
+    Partridge = 14
+}
+
 /**
  * Ensemble action
  */
@@ -12,45 +30,12 @@ namespace ensemble {
     let pulses: number[] = []
     let systemCommand = false
     let msg: string[] = []
-
-    enum ChannelBand {
-        //% block="Albatross"
-        Albatross = 0,
-        //% block="Bananaquit"
-        Bananaquit = 1,
-        //% block="Cassowary"
-        Cassowary = 2,
-        //% block="Dotterel"
-        Dotterel = 3,
-        //% block="Emu"
-        Emu = 4,
-        //% block="Finch"
-        Finch = 5,
-        //% block="Garganey"
-        Garganey = 6,
-        //% block="Hoatzin"
-        Hoatzin = 7,
-        //% block="Ibisbill"
-        Ibisbill = 8,
-        //% block="Killdeer"
-        Killdeer = 9,
-        //% block="Lyrebird"
-        Lyrebird = 10,
-        //% block="Martin"
-        Martin = 11,
-        //% block="Nightingale"
-        Nightingale = 12,
-        //% block="Osprey"
-        Osprey = 13,
-        //% block="Partridge"
-        Partridge = 14
-    }
     
     let channelBand = ChannelBand.Albatross;
-    
+
     /**
-     * Set the 16-channel radio band to broadcast MIDI messages on
-     */
+    * Set the 16-channel radio band to broadcast MIDI messages on
+    */
     //% block="set channel band to $cb"
     //% cb.shadow="dropdown"
     //% cb.defl="ensemble.ChannelBand.Partridge"
