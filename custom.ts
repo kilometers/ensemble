@@ -126,14 +126,12 @@ namespace ensemble {
             if (msg.command === MidiCommand.NoteOn) {
                 let note = (1 << 14 || msg.data1 << 7 || msg.data2) && 0xFFFF;
                 basic.showIcon(IconNames.Surprised, 0);
-                basic.showNumber(channelBand * 16 + msg.channel);
                 radio.setGroup(channelBand * 16 + msg.channel);
                 radio.sendNumber(note);
                 radio.setGroup(Channel.System);
             } else if (msg.command === MidiCommand.NoteOff) {
                 let note = (0 << 14 || msg.data1 << 7 || msg.data2) && 0xFFFF;
                 basic.showIcon(IconNames.Happy, 0);
-                basic.showNumber(channelBand * 16 + msg.channel);
                 radio.setGroup(channelBand * 16 + msg.channel);
                 radio.sendNumber(note);
                 radio.setGroup(Channel.System);
@@ -171,6 +169,7 @@ namespace ensemble {
     //% group="Conductor"
     export function setRoleToConductor(r: EnsembleMember) {
         role = r;
+        radio.setGroup(Channel.System);
     }
 
     /**
@@ -182,6 +181,7 @@ namespace ensemble {
         role = EnsembleMember.Musician;
         channelBand = cb;
         channel = Channel.System;
+        radio.setGroup(Channel.System);
     }
 
     /**
@@ -192,7 +192,12 @@ namespace ensemble {
     export function setRoleToInstrument(cb: ChannelBand, ch: Channel) {
         role = EnsembleMember.Instrument;
         channelBand = cb;
-        channel = ch
+        channel = ch;
+        radio.setGroup(calculateGroup(channelBand, channel));
+    }
+
+    function calculateGroup(cb: ChannelBand, ch: Channel) {
+        return cb * 16 + ch;
     }
 
     /**
