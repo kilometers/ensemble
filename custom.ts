@@ -1,3 +1,7 @@
+/**
+ * Ensemble action
+ */
+//% color=190 weight=100 icon="\uf1ec" block="Basic Blocks"
 namespace ensemble {
     // Initilization flags
     let listeningToSerial = false;
