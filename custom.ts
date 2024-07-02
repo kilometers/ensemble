@@ -139,6 +139,7 @@ namespace ensemble {
         }
     }
 
+    // TODO: Make it safe, it is not safe
     /**
      * Capture midi 
      * NOTE: Only use this in an Instrument microbit
@@ -146,10 +147,9 @@ namespace ensemble {
     //% block="catch MIDI $input from Musician"
     //% group="Instrument"
     export function listenByChannel(input: number) {
-        const bitMsg = +input;
-        let noteOnOff = (bitMsg >> 14) & 1;
-        let note = (bitMsg >> 7) & 0x7F;
-        let velocity = bitMsg & 0x7F;
+        let noteOnOff = (input >> 14) & 1;
+        let note = (input >> 7) & 0x7F;
+        let velocity = input & 0x7F;
 
         if (noteOnOff === 0) {
             for (const handler of noteOffHandlers[note]) {
