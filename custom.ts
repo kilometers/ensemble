@@ -19,7 +19,7 @@ enum ChannelBand {
 /**
  * Ensemble action
  */
-//% color=190 weight=100 icon="\uf1ec" block="Ensemble"
+//% color=190 weight=100 icon="fa-drum" block="Ensemble"
 namespace ensemble {
     // Initilization flags
     let listeningToSerial = false;
