@@ -46,7 +46,7 @@ enum EnsembleMember {
  * Ensemble action
  */
 //% color=190 weight=100 icon="\uf001" block="Ensemble"
-//% groups=['Musician', 'Instrument', 'Conductor']
+//% groups=['Debug', 'Musician', 'Instrument', 'Conductor']
 namespace ensemble {
     let systemStatusTimer = 0
     let messages: MidiMessage[] = []
@@ -126,12 +126,14 @@ namespace ensemble {
             if (msg.command === MidiCommand.NoteOn) {
                 let note = (1 << 14 || msg.data1 << 7 || msg.data2) && 0xFFFF;
                 basic.showIcon(IconNames.Surprised, 0);
+                basic.showNumber(channelBand * 16 + msg.channel);
                 radio.setGroup(channelBand * 16 + msg.channel);
                 radio.sendNumber(note);
                 radio.setGroup(Channel.System);
             } else if (msg.command === MidiCommand.NoteOff) {
                 let note = (0 << 14 || msg.data1 << 7 || msg.data2) && 0xFFFF;
                 basic.showIcon(IconNames.Happy, 0);
+                basic.showNumber(channelBand * 16 + msg.channel);
                 radio.setGroup(channelBand * 16 + msg.channel);
                 radio.sendNumber(note);
                 radio.setGroup(Channel.System);
@@ -191,6 +193,16 @@ namespace ensemble {
         role = EnsembleMember.Instrument;
         channelBand = cb;
         channel = ch
+    }
+
+    /**
+     * Capture midi 
+     * NOTE: Only use this in an Instrument microbit
+     */
+    //% block="debug MIDI $input from Musician"
+    //% group="Debug"
+    export function debugListenByChannel(input: number) {
+        basic.showNumber(input);
     }
 
     basic.forever(() => {
