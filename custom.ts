@@ -16,10 +16,36 @@ enum ChannelBand {
     Partridge = 14
 }
 
+enum Channel {
+    System = 0,
+    Channel_1 = 1,
+    Channel_2 = 2,
+    Channel_3 = 3,
+    Channel_4 = 4,
+    Channel_5 = 5,
+    Channel_6 = 6,
+    Channel_7 = 7,
+    Channel_8 = 8,
+    Channel_9 = 9,
+    Channel_10 = 10,
+    Channel_11 = 11,
+    Channel_12 = 12,
+    Channel_13 = 13,
+    Channel_14 = 14,
+    Channel_15 = 15,
+    Channel_16 = 16
+}
+
+enum EnsembleMember {
+    Conductor,
+    Musician,
+    Instrument
+}
+
 /**
  * Ensemble action
  */
-//% color=190 weight=100 icon="\uf569" block="Ensemble"
+//% color=190 weight=100 icon="\uf001" block="Ensemble"
 namespace ensemble {
     // Initilization flags
     let listeningToSerial = false;
@@ -29,24 +55,35 @@ namespace ensemble {
     let messages: MidiMessage[] = []
     let pulses: number[] = []
     let systemCommand = false
-    let msg: string[] = []
     
     let channelBand = ChannelBand.Albatross;
+    let channel = Channel.System;
+
+    let role = EnsembleMember.Musician
 
     /**
-    * Set the 16-channel radio band to broadcast MIDI messages on
+    * Set the 16-channel radio band to broadcast MIDI messages
     */
     //% block="set channel band to $cb"
     //% cb.shadow="dropdown"
-    //% cb.defl="ensemble.ChannelBand.Partridge"
     export function setChannelBand(cb: ChannelBand): void {
         channelBand = cb;
+    }
+
+    /**
+    * Set the MIDI channel to listen on
+    */
+    //% block="set channel to $ch"
+    //% ch.shadow="dropdown"
+    export function setChannel(ch: Channel): void {
+        channel = ch;
     }
 
     /**
      * On MIDI Note On
      */
     //% block="on MIDI note $note 'on'"
+    //% note.min=35 note.max=127 note.defl=35
     export function onNoteOn(note: number, handler: () => void): void {
         handler();
     }
@@ -55,132 +92,162 @@ namespace ensemble {
      * On MIDI Note Off
      */
     //% block="on MIDI note $note 'off'"
+    //% note.min=35 note.max=127 note.defl=35
     export function onNoteOff(note: number, handler: () => void): void {
         handler();
     }
 
     /**
-     * Set the MIDI source to USB or Serial TX
+     * Initialize Serial for MIDI input
      */
-    //% block="set midi source"
-    export function setMidiSource(): void {
-        if (listeningToSerial) {
-            return;
-        }
-
-        listeningToSerial = true;
-
+    //% block="initialize serial for MIDI"
+    export function initSerialForMidi(): void {
         serial.setTxBufferSize(64)
         serial.setRxBufferSize(64)
         serial.setBaudRate(BaudRate.BaudRate115200)
         serial.redirectToUSB()
-        serial.onDataReceived(serial.delimiters(Delimiters.NewLine), function () {
-            // add midi messages from (read newline) to [messages]
-            msg = serial.readLine().split(",")
-            if (+msg[0] > 248) {
-                // System message
-                messages.push({
-                    command: +msg[0]
-                })
-            } else if (+msg[0] == 248) {
-                // Midi Clock
-            } else {
-                // Midi command
-                let command = (+msg[0] >> 4) & 0x0F;
-                let channel = +msg[0] & 0x0F;
-                messages.push({
-                    command,
-                    channel,
-                    data1: msg[1] ? +msg[1] : undefined,
-                    data2: msg[2] ? +msg[2] : undefined
-                })
-            }
-        })
     }
 
     /**
-     * Begin updating the microbit display according to Ensemble's activity
+     * Capture midi and route it to the appropriate channels
      */
-    //% block="start updating the display"
-    export function startUpdatingDisplay() {
-        if (updatingDisplay) {
-            return
-        }
-        
-        updatingDisplay = true;
-        basic.forever(function () {
-            switch (state) {
-                case STATE.IDLE:
-                    break;
-                case STATE.TRANSMITTING:
-                    let commandDisplayed = undefined;
-                    if (systemStatusTimer == 0 && messages.length > 0) {
-                        commandDisplayed = MidiCommand.NoteOff;
-                        for (const msg2 of messages) {
-                            if (msg2.command > 248) {
-                                systemStatusTimer = 30;
-                                commandDisplayed = msg2.command;
-                                break;
-                            }
-                            else if (msg2.command === MidiCommand.NoteOn) {
-                                commandDisplayed = MidiCommand.NoteOn;
-                                // let note = (1 << 7 || msg.data1) && 0xFF
-                                let note = (1 << 14 || msg2.data1 << 7 || msg2.data2) && 0xFFFF;
-                                
-                                radio.setGroup(channelBand * 16 + msg2.channel)
-                                radio.sendNumber(note)
-                                radio.setGroup(0)
-                                // pulses.push(new Pulse())
-                            }
-                        }
-                        messages = []
-                    } else if (systemStatusTimer > 0) {
-                        systemStatusTimer -= 1;
-                    }
-                    switch (commandDisplayed) {
-                        case MidiCommand.Continue:
-                        case MidiCommand.Start:
-                            basic.showLeds(`
-                    . # . . .
-                    . # # . .
-                    . # # # .
-                    . # # . .
-                    . # . . .
-                    `, 0);
-                            break;
-                        case MidiCommand.Stop:
-                            basic.showLeds(`
-                    # # . # #
-                    # # . # #
-                    # # . # #
-                    # # . # #
-                    # # . # #
-                    `, 0);
-                            break;
-                        case MidiCommand.NoteOn:
-                            basic.showIcon(IconNames.Surprised, 0);
-                            break;
-                        case MidiCommand.NoteOff:
-                            basic.showIcon(IconNames.Happy, 0);
-                            break;
-                    }
-                    break;
-                case STATE.ERROR:
-                    basic.showIcon(IconNames.Skull, 0);
-                    break;
+    //% block="route midi $input"
+    export function routeMidiByChannel(input: string[]) {
+        let parsed = serial.readLine().split(",");
+        if (+parsed[0] > 248) {             // System message
+            radio.setGroup(Channel.System);
+            radio.sendNumber(+parsed[0]);
+        } else if (+parsed[0] == 248) {     // Midi Clock
+            //...
+        } else if (parsed.length > 1) {     // Midi command
+            let command = (+parsed[0] >> 4) & 0x0F;
+            let channel = +parsed[0] & 0x0F;
+
+            const msg: MidiMessage = {
+                command,
+                channel,
+                data1: +parsed[1],
+                data2: +parsed[2]
             }
-        })
+
+            if (msg.command === MidiCommand.NoteOn) {
+                let note = (1 << 14 || msg.data1 << 7 || msg.data2) && 0xFFFF;
+                radio.setGroup(channelBand * 16 + msg.channel);
+                radio.sendNumber(note);
+                radio.setGroup(Channel.System);
+            } else if (msg.command === MidiCommand.NoteOff) {
+                let note = (0 << 14 || msg.data1 << 7 || msg.data2) && 0xFFFF;
+                radio.setGroup(channelBand * 16 + msg.channel);
+                radio.sendNumber(note);
+                radio.setGroup(Channel.System);
+            }
+        }
     }
+
+    /**
+     * Start broadcasting incoming MIDI messages
+     */
+    //% block="listen to MIDI messages"
+    export function broadcastMidi() {
+        state = STATE.BROADCASTING;
+    }
+
+    /**
+     * Set microbit's role in the ensemble
+     */
+    //% block="set ensemble role to $r"
+    export function setRole(r: EnsembleMember) {
+        role = r;
+    }
+
+    basic.forever(() => {
+        switch (role) {
+            case EnsembleMember.Musician:
+                messages.forEach(msg => {
+                    if (msg.command === MidiCommand.NoteOn) {
+                        let note = (1 << 14 || msg.data1 << 7 || msg.data2) && 0xFFFF;
+                        radio.setGroup(channelBand * 16 + msg.channel);
+                        radio.sendNumber(note);
+                        radio.setGroup(Channel.System);
+                    } else if (msg.command === MidiCommand.NoteOff) {
+                        let note = (0 << 14 || msg.data1 << 7 || msg.data2) && 0xFFFF;
+                        radio.setGroup(channelBand * 16 + msg.channel);
+                        radio.sendNumber(note);
+                        radio.setGroup(Channel.System);
+                    }
+                });
+                break;
+        }
+    })
+
+    // TODO: Move display logic into a separate area
+    basic.forever(function () {
+        switch (state) {
+            case STATE.IDLE:
+                break;
+            case STATE.BROADCASTING:
+                let commandDisplayed = undefined;
+                if (systemStatusTimer == 0 && messages.length > 0) {
+                    commandDisplayed = MidiCommand.NoteOff;
+                    for (const msg2 of messages) {
+                        if (msg2.command > 248) {
+                            systemStatusTimer = 30;
+                            commandDisplayed = msg2.command;
+                            break;
+                        }
+                        else if (msg2.command === MidiCommand.NoteOn) {
+                            commandDisplayed = MidiCommand.NoteOn;
+                            let note = (1 << 14 || msg2.data1 << 7 || msg2.data2) && 0xFFFF;
+                            // pulses.push(new Pulse())
+                        }
+                    }
+                    messages = []
+                } else if (systemStatusTimer > 0) {
+                    systemStatusTimer -= 1;
+                }
+                switch (commandDisplayed) {
+                    case MidiCommand.Continue:
+                    case MidiCommand.Start:
+                        basic.showLeds(`
+                . # . . .
+                . # # . .
+                . # # # .
+                . # # . .
+                . # . . .
+                `, 0);
+                        break;
+                    case MidiCommand.Stop:
+                        basic.showLeds(`
+                # # . # #
+                # # . # #
+                # # . # #
+                # # . # #
+                # # . # #
+                `, 0);
+                        break;
+                    case MidiCommand.NoteOn:
+                        basic.showIcon(IconNames.Surprised, 0);
+                        break;
+                    case MidiCommand.NoteOff:
+                        basic.showIcon(IconNames.Happy, 0);
+                        break;
+                }
+                break;
+            case STATE.ERROR:
+                basic.showIcon(IconNames.Skull, 0);
+                break;
+        }
+    })
 
     basic.showIcon(IconNames.Happy, 0);
 }
 
 enum STATE {
     IDLE,
-    TRANSMITTING,
+    BROADCASTING,
     ERROR
 }
-let state: STATE = STATE.TRANSMITTING;
+let state: STATE = STATE.IDLE;
 interface MidiMessage {
     command: MidiCommand
     channel?: number
@@ -207,3 +274,23 @@ class Pulse {
         this.duration = duration | 40;
     }
 }
+
+// let msg = serial.readLine().split(",")
+//         if (+msg[0] > 248) {
+//             // System message
+//             messages.push({
+//                 command: +msg[0]
+//             })
+//         } else if (+msg[0] == 248) {
+//             // Midi Clock
+//         } else {
+//             // Midi command
+//             let command = (+msg[0] >> 4) & 0x0F;
+//             let channel = +msg[0] & 0x0F;
+//             messages.push({
+//                 command,
+//                 channel,
+//                 data1: msg[1] ? +msg[1] : undefined,
+//                 data2: msg[2] ? +msg[2] : undefined
+//             })
+//         }
