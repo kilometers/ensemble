@@ -145,7 +145,7 @@ namespace ensemble {
      */
     //% block="catch MIDI $input from Musician"
     //% group="Instrument"
-    export function listenByChannel(input: string) {
+    export function listenByChannel(input: number) {
         const bitMsg = +input;
         let noteOnOff = (bitMsg >> 14) & 1;
         let note = (bitMsg >> 7) & 0x7F;
