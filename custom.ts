@@ -14,31 +14,46 @@ namespace ensemble {
     let msg: string[] = []
 
     enum ChannelBand {
-        Albatross,
-        Bananaquit,
-        Cassowary,
-        Doterrel,
-        Emu,
-        Finch,
-        Gargeney,
-        Hoatzin,
-        Idisbill,
-        Killdeer,
-        Lyrebird,
-        Martin,
-        Nightingale,
-        Osprey,
-        Partridge,
-        // Quetzal=16
+        //% block="Albatross"
+        Albatross = 0,
+        //% block="Bananaquit"
+        Bananaquit = 1,
+        //% block="Cassowary"
+        Cassowary = 2,
+        //% block="Dotterel"
+        Dotterel = 3,
+        //% block="Emu"
+        Emu = 4,
+        //% block="Finch"
+        Finch = 5,
+        //% block="Garganey"
+        Garganey = 6,
+        //% block="Hoatzin"
+        Hoatzin = 7,
+        //% block="Ibisbill"
+        Ibisbill = 8,
+        //% block="Killdeer"
+        Killdeer = 9,
+        //% block="Lyrebird"
+        Lyrebird = 10,
+        //% block="Martin"
+        Martin = 11,
+        //% block="Nightingale"
+        Nightingale = 12,
+        //% block="Osprey"
+        Osprey = 13,
+        //% block="Partridge"
+        Partridge = 14
     }
-
+    
     let channelBand = ChannelBand.Albatross;
-
+    
     /**
      * Set the 16-channel radio band to broadcast MIDI messages on
      */
     //% block="set channel band to $cb"
-    //% cb.defl=ChannelBand.Albatross
+    //% cb.shadow="dropdown"
+    //% cb.defl="ensemble.ChannelBand.Partridge"
     export function setChannelBand(cb: ChannelBand): void {
         channelBand = cb;
     }
@@ -47,7 +62,6 @@ namespace ensemble {
      * On MIDI Note On
      */
     //% block="on MIDI note $note 'on'"
-    //% note.min=35 note.max=127 note.defl=35 
     export function onNoteOn(note: number, handler: () => void): void {
         handler();
     }
@@ -56,7 +70,6 @@ namespace ensemble {
      * On MIDI Note Off
      */
     //% block="on MIDI note $note 'off'"
-    //% note.min=35 note.max=127 note.defl=35 
     export function onNoteOff(note: number, handler: () => void): void {
         handler();
     }
