@@ -112,7 +112,7 @@ namespace ensemble {
      * Capture midi and route it to the appropriate channels
      */
     //% block="route midi $input"
-    export function routeMidiByChannel(input: string[]) {
+    export function routeMidiByChannel(input: string) {
         let parsed = serial.readLine().split(",");
         if (+parsed[0] > 248) {             // System message
             radio.setGroup(Channel.System);
@@ -153,11 +153,31 @@ namespace ensemble {
     }
 
     /**
-     * Set microbit's role in the ensemble
+     * The microbit will behave as a Conductor in the ensemble
      */
-    //% block="set ensemble role to $r"
-    export function setRole(r: EnsembleMember) {
+    //% block="set ensemble role to conductor"
+    export function setRoleToConductor(r: EnsembleMember) {
         role = r;
+    }
+
+    /**
+     * The microbit will behave as a Musican in the ensemble
+     */
+    //% block="set ensemble role to musician on band $cb"
+    export function setRoleToMusician(cb: ChannelBand) {
+        role = EnsembleMember.Musician;
+        channelBand = cb;
+        channel = 0;
+    }
+
+    /**
+     * The microbit will behave as an Instrument in the ensemble
+     */
+    //% block="set as an instrument on band $cb and channel $ch"
+    export function setRoleToInstrument(cb: ChannelBand, ch: Channel) {
+        role = EnsembleMember.Instrument;
+        channelBand = cb;
+        channel = ch
     }
 
     basic.forever(() => {
