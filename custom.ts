@@ -46,6 +46,7 @@ enum EnsembleMember {
  * Ensemble action
  */
 //% color=190 weight=100 icon="\uf001" block="Ensemble"
+//% groups=['Musician', 'Instrument', 'Conductor']
 namespace ensemble {
     // Initilization flags
     let listeningToSerial = false;
@@ -59,48 +60,42 @@ namespace ensemble {
     let channelBand = ChannelBand.Albatross;
     let channel = Channel.System;
 
-    let role = EnsembleMember.Musician
+    let role = EnsembleMember.Musician;
 
-    /**
-    * Set the 16-channel radio band to broadcast MIDI messages
-    */
-    //% block="set channel band to $cb"
-    //% cb.shadow="dropdown"
-    export function setChannelBand(cb: ChannelBand): void {
-        channelBand = cb;
-    }
-
-    /**
-    * Set the MIDI channel to listen on
-    */
-    //% block="set channel to $ch"
-    //% ch.shadow="dropdown"
-    export function setChannel(ch: Channel): void {
-        channel = ch;
-    }
+    let noteOnHandlers: { [note: number]: (() => void)[] } = {};
+    let noteOffHandlers: { [note: number]: (() => void)[] } = {};
 
     /**
      * On MIDI Note On
      */
     //% block="on MIDI note $note 'on'"
     //% note.min=35 note.max=127 note.defl=35
+    //% group="Instrument"
     export function onNoteOn(note: number, handler: () => void): void {
-        handler();
+        if (!noteOnHandlers[note]) {
+            noteOnHandlers[note] = [];
+        }
+        noteOnHandlers[note].push(handler);
     }
 
-     /**
+    /**
      * On MIDI Note Off
      */
     //% block="on MIDI note $note 'off'"
     //% note.min=35 note.max=127 note.defl=35
+    //% group="Instrument"
     export function onNoteOff(note: number, handler: () => void): void {
-        handler();
+        if (!noteOffHandlers[note]) {
+            noteOffHandlers[note] = [];
+        }
+        noteOffHandlers[note].push(handler);
     }
 
     /**
      * Initialize Serial for MIDI input
      */
     //% block="initialize serial for MIDI"
+    //% group="Musician"
     export function initSerialForMidi(): void {
         serial.setTxBufferSize(64)
         serial.setRxBufferSize(64)
@@ -109,9 +104,11 @@ namespace ensemble {
     }
 
     /**
-     * Capture midi and route it to the appropriate channels
+     * Capture midi and route it to the appropriate channels over radio
+     * NOTE: Only use this in a Musician microbit
      */
-    //% block="route midi $input"
+    //% block="route MIDI $input to Instruments"
+    //% group="Musician"
     export function routeMidiByChannel(input: string) {
         let parsed = serial.readLine().split(",");
         if (+parsed[0] > 248) {             // System message
@@ -145,17 +142,33 @@ namespace ensemble {
     }
 
     /**
-     * Start broadcasting incoming MIDI messages
+     * Capture midi 
+     * NOTE: Only use this in an Instrument microbit
      */
-    //% block="listen to MIDI messages"
-    export function broadcastMidi() {
-        state = STATE.BROADCASTING;
+    //% block="catch MIDI $input from Musician"
+    //% group="Instrument"
+    export function listenByChannel(input: string) {
+        const bitMsg = +input;
+        let noteOnOff = (bitMsg >> 14) & 1;
+        let note = (bitMsg >> 7) & 0x7F;
+        let velocity = bitMsg & 0x7F;
+
+        if (noteOnOff === 0) {
+            for (const handler of noteOffHandlers[note]) {
+                handler();
+            }
+        } else if (noteOnOff === 1) {
+            for (const handler of noteOnHandlers[note]) {
+                handler();
+            }
+        }
     }
 
     /**
      * The microbit will behave as a Conductor in the ensemble
      */
-    //% block="set ensemble role to conductor"
+    //% block="be a Conductor"
+    //% group="Conductor"
     export function setRoleToConductor(r: EnsembleMember) {
         role = r;
     }
@@ -163,7 +176,8 @@ namespace ensemble {
     /**
      * The microbit will behave as a Musican in the ensemble
      */
-    //% block="set ensemble role to musician on band $cb"
+    //% block="be a Musician on band $cb"
+    //% group="Musician"
     export function setRoleToMusician(cb: ChannelBand) {
         role = EnsembleMember.Musician;
         channelBand = cb;
@@ -173,7 +187,8 @@ namespace ensemble {
     /**
      * The microbit will behave as an Instrument in the ensemble
      */
-    //% block="set as an instrument on band $cb and channel $ch"
+    //% block="be an Instrument on band $cb and channel $ch"
+    //% group="Instrument"
     export function setRoleToInstrument(cb: ChannelBand, ch: Channel) {
         role = EnsembleMember.Instrument;
         channelBand = cb;
