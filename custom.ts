@@ -18,22 +18,22 @@ enum ChannelBand {
 
 enum Channel {
     System = 0,
-    Channel_1 = 1,
-    Channel_2 = 2,
-    Channel_3 = 3,
-    Channel_4 = 4,
-    Channel_5 = 5,
-    Channel_6 = 6,
-    Channel_7 = 7,
-    Channel_8 = 8,
-    Channel_9 = 9,
-    Channel_10 = 10,
-    Channel_11 = 11,
-    Channel_12 = 12,
-    Channel_13 = 13,
-    Channel_14 = 14,
-    Channel_15 = 15,
-    Channel_16 = 16
+    _1 = 1,
+    _2 = 2,
+    _3 = 3,
+    _4 = 4,
+    _5 = 5,
+    _6 = 6,
+    _7 = 7,
+    _8 = 8,
+    _9 = 9,
+    _10 = 10,
+    _11 = 11,
+    _12 = 12,
+    _13 = 13,
+    _14 = 14,
+    _15 = 15,
+    _16 = 16
 }
 
 enum EnsembleMember {
@@ -48,10 +48,6 @@ enum EnsembleMember {
 //% color=190 weight=100 icon="\uf001" block="Ensemble"
 //% groups=['Musician', 'Instrument', 'Conductor']
 namespace ensemble {
-    // Initilization flags
-    let listeningToSerial = false;
-    let updatingDisplay = false;
-
     let systemStatusTimer = 0
     let messages: MidiMessage[] = []
     let pulses: number[] = []
@@ -93,9 +89,9 @@ namespace ensemble {
 
     /**
      * Initialize Serial for MIDI input
+     * NOTE: Used by the Musican and the Conductor
      */
     //% block="initialize serial for MIDI"
-    //% group="Musician"
     export function initSerialForMidi(): void {
         serial.setTxBufferSize(64)
         serial.setRxBufferSize(64)
@@ -129,11 +125,13 @@ namespace ensemble {
 
             if (msg.command === MidiCommand.NoteOn) {
                 let note = (1 << 14 || msg.data1 << 7 || msg.data2) && 0xFFFF;
+                basic.showIcon(IconNames.Surprised, 0);
                 radio.setGroup(channelBand * 16 + msg.channel);
                 radio.sendNumber(note);
                 radio.setGroup(Channel.System);
             } else if (msg.command === MidiCommand.NoteOff) {
                 let note = (0 << 14 || msg.data1 << 7 || msg.data2) && 0xFFFF;
+                basic.showIcon(IconNames.Happy, 0);
                 radio.setGroup(channelBand * 16 + msg.channel);
                 radio.sendNumber(note);
                 radio.setGroup(Channel.System);
@@ -181,7 +179,7 @@ namespace ensemble {
     export function setRoleToMusician(cb: ChannelBand) {
         role = EnsembleMember.Musician;
         channelBand = cb;
-        channel = 0;
+        channel = Channel.System;
     }
 
     /**
