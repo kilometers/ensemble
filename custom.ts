@@ -44,38 +44,12 @@ namespace ensemble {
         // Quetzal=16
     }
 
-    enum NoteVal {
-        //% block="35"
-        _35,
-        //% block="36"
-        _36,
-        //% block="37"
-        _37,
-        //% block="38"
-        _38,
-        //% block="39"
-        _39,
-        //% block="40"
-        _40,
-        //% block="41"
-        _41,
-        //% block="42"
-        _42,
-        //% block="43"
-        _43,
-        //% block="44"
-        _44,
-        //% block="45"
-        _45,
-        //% block="46"
-        _46
-    }
-
     /**
      * On MIDI Note On
      */
     //% block="on note $note on"
-    export function onNoteOn(note: NoteVal, handler: () => void): void {
+    //% note.min=35 note.max=127 note.defl=35 
+    export function onNoteOn(note: number, handler: () => void): void {
         handler();
     }
 
@@ -83,8 +57,8 @@ namespace ensemble {
      * On MIDI Note Off
      */
     //% block="on note $note off"
-    //% note.shadow="dropdown"
-    export function onNoteOff(note: NoteVal, handler: () => void): void {
+    //% note.min=35 note.max=127 note.defl=35 
+    export function onNoteOff(note: number, handler: () => void): void {
         handler();
     }
 
