@@ -114,10 +114,8 @@ namespace ensemble {
             //...
         } else if (parsed.length > 1) {     // Midi command
             let command = (+parsed[0] >> 4) & 0x0F;
-            let channel = +parsed[0] & 0x0F + 1;
+            let channel = (+parsed[0] & 0x0F) + 1;
 
-            basic.showNumber((+parsed[0] >> 4) & 0x0F);
-            basic.showNumber((+parsed[0] & 0x0F) + 1);
             const msg: MidiMessage = {
                 command,
                 channel,
@@ -127,19 +125,16 @@ namespace ensemble {
 
             if (msg.command === MidiCommand.NoteOn) {
                 let note = (1 << 14 || msg.data1 << 7 || msg.data2) && 0xFFFF;
-                // basic.showIcon(IconNames.Surprised, 0);
-                // basic.showString(`-- ${channelBand}, ${msg.channel}`);
-                // radio.setGroup(1);
-                // // radio.setGroup(channelBand * 16 + msg.channel);
-                // radio.sendNumber(note);
-                // radio.setGroup(Channel.System);
+                basic.showIcon(IconNames.Surprised, 0);
+                radio.setGroup(channelBand * 16 + msg.channel);
+                radio.sendNumber(note);
+                radio.setGroup(Channel.System);
             } else if (msg.command === MidiCommand.NoteOff) {
-                // let note = (0 << 14 || msg.data1 << 7 || msg.data2) && 0xFFFF;
-                // basic.showIcon(IconNames.Happy, 0);
-                // // radio.setGroup(channelBand * 16 + msg.channel);
-                // radio.setGroup(1);
-                // radio.sendNumber(note);
-                // radio.setGroup(Channel.System);
+                let note = (0 << 14 || msg.data1 << 7 || msg.data2) && 0xFFFF;
+                basic.showIcon(IconNames.Happy, 0);
+                radio.setGroup(channelBand * 16 + msg.channel);
+                radio.sendNumber(note);
+                radio.setGroup(Channel.System);
             }
         }
     }
@@ -305,7 +300,7 @@ enum STATE {
 let state: STATE = STATE.IDLE;
 interface MidiMessage {
     command: MidiCommand
-    channel?: number
+    channel?: Channel
     data1?: number
     data2?: number
 }
