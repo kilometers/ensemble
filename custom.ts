@@ -106,7 +106,7 @@ namespace ensemble {
     //% block="route MIDI $input to Instruments"
     //% group="Musician"
     export function routeMidiByChannel(input: string) {
-        let parsed = serial.readLine().split(",");
+        let parsed = input.split(",");
         if (+parsed[0] > 248) {             // System message
             radio.setGroup(Channel.System);
             radio.sendNumber(+parsed[0]);
