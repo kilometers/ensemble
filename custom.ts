@@ -116,6 +116,7 @@ namespace ensemble {
             let command = (+parsed[0] >> 4) & 0x0F;
             let channel = +parsed[0] & 0x0F + 1;
 
+            basic.showNumber(+parsed[0]);
             const msg: MidiMessage = {
                 command,
                 channel,
@@ -126,7 +127,7 @@ namespace ensemble {
             if (msg.command === MidiCommand.NoteOn) {
                 let note = (1 << 14 || msg.data1 << 7 || msg.data2) && 0xFFFF;
                 // basic.showIcon(IconNames.Surprised, 0);
-                basic.showString(`-- ${channelBand}, ${msg.channel}`);
+                // basic.showString(`-- ${channelBand}, ${msg.channel}`);
                 // radio.setGroup(1);
                 // // radio.setGroup(channelBand * 16 + msg.channel);
                 // radio.sendNumber(note);
