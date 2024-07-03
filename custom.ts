@@ -116,7 +116,8 @@ namespace ensemble {
             let command = (+parsed[0] >> 4) & 0x0F;
             let channel = +parsed[0] & 0x0F + 1;
 
-            basic.showNumber(+parsed[0] & 0x0F);
+            basic.showNumber((+parsed[0] >> 4) & 0x0F);
+            basic.showNumber((+parsed[0] & 0x0F) + 1);
             const msg: MidiMessage = {
                 command,
                 channel,
