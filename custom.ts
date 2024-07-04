@@ -125,6 +125,7 @@ namespace ensemble {
 
             if (msg.command === MidiCommand.NoteOn) {
                 let note = (1 << 14 || msg.data1 << 7 || msg.data2) && 0xFFFF;
+                basic.showNumber(msg.data1)
                 basic.showIcon(IconNames.Surprised, 0);
                 radio.setGroup(channelBand * 16 + msg.channel);
                 radio.sendNumber(note);
