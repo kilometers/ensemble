@@ -151,6 +151,8 @@ namespace ensemble {
         let note = (input >> 7) & 0x7F;
         let velocity = input & 0x7F;
 
+        basic.showString(`-- ${noteOnOff}, ${note}, ${velocity}`);
+
         if (noteOnOff === 0) {
             for (const handler of noteOffHandlers[note]) {
                 handler();
