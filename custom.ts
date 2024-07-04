@@ -82,7 +82,7 @@ namespace ensemble {
     //% block="on MIDI message 'note on' | $note $velocity"
     //% draggableParameters="reporter"
     //% group="Instrument"
-    export function onAnyNoteOn(n: number, v: number, handler: (note: number, velocity: number) => void): void {
+    export function onAnyNoteOn(handler: (note: number, velocity: number) => void): void {
         globalNoteOnHandler = (n: number, v: number) => handler(n, v);
     }
 
