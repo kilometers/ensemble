@@ -58,8 +58,10 @@ namespace ensemble {
 
     let role = EnsembleMember.Musician;
 
-    let noteOnHandlers: { [note: number]: (() => void)[] } = {};
-    let noteOffHandlers: { [note: number]: (() => void)[] } = {};
+    let noteOnHandlers: { [note: number]: ((...[any]: any) => void)[] } = {};
+    let noteOffHandlers: { [note: number]: ((...[any]: any) => void)[] } = {};
+    let globalNoteOnHandler: (...[any]: any) => void;
+    let globalNoteOffHandler: (...[any]: any) => void;
 
     /**
      * On MIDI Note On
@@ -67,11 +69,21 @@ namespace ensemble {
     //% block="on MIDI note $note 'on'"
     //% note.min=35 note.max=127 note.defl=35
     //% group="Instrument"
-    export function onNoteOn(note: number, handler: () => void): void {
+    export function onNoteOn(note: number, handler: (velocity: number) => void): void {
         if (!noteOnHandlers[note]) {
             noteOnHandlers[note] = [];
         }
         noteOnHandlers[note].push(handler);
+    }
+    
+    /**
+     * On MIDI Note On
+     */
+    //% block="on MIDI message 'note on' | $note $velocity"
+    //% draggableParameters="reporter"
+    //% group="Instrument"
+    export function onAnyNoteOn(n: number, v: number, handler: (note: number, velocity: number) => void): void {
+        globalNoteOnHandler = () => handler(n, v);
     }
 
     /**
@@ -157,6 +169,7 @@ namespace ensemble {
                 handler();
             }
         } else if (noteOnOff === 1 && noteOnHandlers[note] !== undefined) {
+            globalNoteOnHandler(note, velocity);
             for (const handler of noteOnHandlers[note]) {
                 handler();
             }
@@ -189,6 +202,7 @@ namespace ensemble {
      * The microbit will behave as an Instrument in the ensemble
      */
     //% block="be an Instrument on band $cb and channel $ch"
+    //% ch.defl=Channel._1
     //% group="Instrument"
     export function setRoleToInstrument(cb: ChannelBand, ch: Channel) {
         role = EnsembleMember.Instrument;
