@@ -58,10 +58,10 @@ namespace ensemble {
 
     let role = EnsembleMember.Musician;
 
-    let noteOnHandlers: { [note: number]: ((...[any]: any) => void)[] } = {};
-    let noteOffHandlers: { [note: number]: ((...[any]: any) => void)[] } = {};
-    let globalNoteOnHandler: (...[any]: any) => void;
-    let globalNoteOffHandler: (...[any]: any) => void;
+    let noteOnHandlers: { [note: number]: (() => void)[] } = {};
+    let noteOffHandlers: { [note: number]: (() => void)[] } = {};
+    let globalNoteOnHandler: () => void = () => { };
+    let globalNoteOffHandler: () => void = () => { };
 
     /**
      * On MIDI Note On
@@ -69,7 +69,7 @@ namespace ensemble {
     //% block="on MIDI note $note 'on'"
     //% note.min=35 note.max=127 note.defl=35
     //% group="Instrument"
-    export function onNoteOn(note: number, handler: (velocity: number) => void): void {
+    export function onNoteOn(note: number, handler: () => void): void {
         if (!noteOnHandlers[note]) {
             noteOnHandlers[note] = [];
         }
@@ -97,6 +97,16 @@ namespace ensemble {
             noteOffHandlers[note] = [];
         }
         noteOffHandlers[note].push(handler);
+    }
+
+    /**
+     * On any MIDI Note Off
+     */
+    //% block="on MIDI message 'note on' | $note $velocity"
+    //% draggableParameters="reporter"
+    //% group="Instrument"
+    export function onAnyNoteOff(n: number, v: number, handler: (note: number, velocity: number) => void): void {
+        globalNoteOffHandler = () => handler(n, v);
     }
 
     /**
@@ -165,11 +175,12 @@ namespace ensemble {
         let velocity = input & 0x7F;
 
         if (noteOnOff === 0 && noteOffHandlers[note] !== undefined) {
+            globalNoteOnHandler();
             for (const handler of noteOffHandlers[note]) {
                 handler();
             }
         } else if (noteOnOff === 1 && noteOnHandlers[note] !== undefined) {
-            globalNoteOnHandler(note, velocity);
+            globalNoteOffHandler();
             for (const handler of noteOnHandlers[note]) {
                 handler();
             }
