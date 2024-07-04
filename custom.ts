@@ -124,14 +124,14 @@ namespace ensemble {
             }
 
             if (msg.command === MidiCommand.NoteOn) {
-                let note = (1 << 14 || msg.data1 << 7 || msg.data2) && 0xFFFF;
+                let note = (1 << 14 || msg.data1 << 7 || msg.data2) & 0xFFFF;
                 basic.showIcon(IconNames.Surprised, 0);
                 basic.showNumber(note);
                 radio.setGroup(channelBand * 16 + msg.channel);
                 radio.sendNumber(note);
                 radio.setGroup(Channel.System);
             } else if (msg.command === MidiCommand.NoteOff) {
-                let note = (0 << 14 || msg.data1 << 7 || msg.data2) && 0xFFFF;
+                let note = (0 << 14 || msg.data1 << 7 || msg.data2) & 0xFFFF;
                 basic.showIcon(IconNames.Happy, 0);
                 radio.setGroup(channelBand * 16 + msg.channel);
                 radio.sendNumber(note);
@@ -154,11 +154,11 @@ namespace ensemble {
 
         basic.showString(`-- ${noteOnOff}, ${note}, ${velocity}`);
 
-        if (noteOnOff === 0) {
+        if (noteOnOff === 0 && noteOffHandlers[note] !== undefined) {
             for (const handler of noteOffHandlers[note]) {
                 handler();
             }
-        } else if (noteOnOff === 1) {
+        } else if (noteOnOff === 1 && noteOnHandlers[note] !== undefined) {
             for (const handler of noteOnHandlers[note]) {
                 handler();
             }
