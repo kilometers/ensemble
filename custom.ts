@@ -102,7 +102,7 @@ namespace ensemble {
     /**
      * On any MIDI Note Off
      */
-    //% block="on MIDI message 'note on' | $note $velocity"
+    //% block="on MIDI message 'note off' | $note $velocity"
     //% draggableParameters="reporter"
     //% group="Instrument"
     export function onAnyNoteOff(handler: (note: number, velocity: number) => void): void {
