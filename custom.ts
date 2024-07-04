@@ -99,6 +99,7 @@ namespace ensemble {
         serial.redirectToUSB()
     }
 
+    // TODO: Go back to using normal midi format?
     /**
      * Capture midi and route it to the appropriate channels over radio
      * NOTE: Only use this in a Musician microbit
@@ -146,12 +147,10 @@ namespace ensemble {
      */
     //% block="catch MIDI $input from Musician"
     //% group="Instrument"
-    export function listenByChannel(input: number) {
+    export function catchMidi(input: number) {
         let noteOnOff = (input >> 14) & 1;
         let note = (input >> 7) & 0x7F;
         let velocity = input & 0x7F;
-
-        basic.showString(`-- ${noteOnOff}, ${note}, ${velocity}`);
 
         if (noteOnOff === 0 && noteOffHandlers[note] !== undefined) {
             for (const handler of noteOffHandlers[note]) {
