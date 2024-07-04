@@ -60,8 +60,8 @@ namespace ensemble {
 
     let noteOnHandlers: { [note: number]: (() => void)[] } = {};
     let noteOffHandlers: { [note: number]: (() => void)[] } = {};
-    let globalNoteOnHandler: () => void = () => { };
-    let globalNoteOffHandler: () => void = () => { };
+    let globalNoteOnHandler: (note: number, velocity: number) => void = (n: number, v: number) => { };
+    let globalNoteOffHandler: (note: number, velocity: number) => void = (n: number, v: number) => { };
 
     /**
      * On MIDI Note On
@@ -83,7 +83,7 @@ namespace ensemble {
     //% draggableParameters="reporter"
     //% group="Instrument"
     export function onAnyNoteOn(n: number, v: number, handler: (note: number, velocity: number) => void): void {
-        globalNoteOnHandler = () => handler(n, v);
+        globalNoteOnHandler = (n: number, v: number) => handler(n, v);
     }
 
     /**
@@ -105,8 +105,8 @@ namespace ensemble {
     //% block="on MIDI message 'note on' | $note $velocity"
     //% draggableParameters="reporter"
     //% group="Instrument"
-    export function onAnyNoteOff(n: number, v: number, handler: (note: number, velocity: number) => void): void {
-        globalNoteOffHandler = () => handler(n, v);
+    export function onAnyNoteOff(handler: (note: number, velocity: number) => void): void {
+        globalNoteOffHandler = (n: number, v: number) => handler(n, v);
     }
 
     /**
@@ -175,12 +175,12 @@ namespace ensemble {
         let velocity = input & 0x7F;
 
         if (noteOnOff === 0 && noteOffHandlers[note] !== undefined) {
-            globalNoteOnHandler();
+            globalNoteOnHandler(note, velocity);
             for (const handler of noteOffHandlers[note]) {
                 handler();
             }
         } else if (noteOnOff === 1 && noteOnHandlers[note] !== undefined) {
-            globalNoteOffHandler();
+            globalNoteOffHandler(note, velocity);
             for (const handler of noteOnHandlers[note]) {
                 handler();
             }
