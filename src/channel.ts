@@ -57,7 +57,7 @@ namespace ensemble {
     export class ChannelLed {
         channel: Channel;
         brightness = 0;
-        decay = 2;
+        decay = 50;
         minBrightness =  0;
         maxBrightness = 255;
         state = false;

@@ -38,12 +38,14 @@ namespace ensemble {
     //% block="show musician broadcast display"
     //% group="Musician"
     export function showMuscianBroadcastDisplay() {
-        if (Math.random() > 0.99) {
+        if (Math.random() > 0.5) {
             channelLeds[Math.floor(Math.random() * 15)].on();
+            channelLeds[Math.floor(Math.random() * 15)].off();
         }
         // basic.clearScreen();
         // Render channel indicators
         for (let i = 0; i < 16; i++) {
+            channelLeds[i].update();
             led.plotBrightness(i % 4, Math.floor(i / 4), channelLeds[i].brightness);
         }
     }
