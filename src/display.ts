@@ -7,6 +7,10 @@ namespace ensemble {
         minBrightness =  0;
         maxBrightness = 255;
 
+        constructor() {
+            // nothing to do here
+        }
+
         activate(strength: number) {  
             this.brightness = this.maxBrightness * strength / 100;
         }
