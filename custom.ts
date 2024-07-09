@@ -38,7 +38,10 @@ namespace ensemble {
     //% block="show musician broadcast display"
     //% group="Musician"
     export function showMuscianBroadcastDisplay() {
-        basic.clearScreen();
+        if (Math.random() > 0.99) {
+            channelLeds[Math.floor(Math.random() * 15)].on();
+        }
+        // basic.clearScreen();
         // Render channel indicators
         for (let i = 0; i < 16; i++) {
             led.plotBrightness(i % 4, Math.floor(i / 4), channelLeds[i].brightness);
