@@ -10,18 +10,17 @@ enum EnsembleMember {
 //% color=190 weight=100 icon="\uf001" block="Ensemble"
 //% groups=['Debug', 'Musician', 'Instrument', 'Conductor']
 namespace ensemble {
-    let systemStatusTimer = 0
-    let messages: MidiMessage[] = []
-    let pulses: number[] = []
-    let systemCommand = false
+    let systemStatusTimer = 0;
+    let messages: MidiMessage[] = [];
+    let pulses: number[] = [];
+    let systemCommand = false;
     
     let channelBand = ChannelBand.Albatross;
     let channel = Channel.System;
 
     let role = EnsembleMember.Musician;
 
-    // let noteOnHandlers: { [note: number]: (() => void)[] } = {};
-    // let noteOffHandlers: { [note: number]: (() => void)[] } = {};
+    
     let globalNoteOnHandler: (note: number, velocity: number) => void = (n: number, v: number) => { };
     let globalNoteOffHandler: (note: number, velocity: number) => void = (n: number, v: number) => { };
     
@@ -37,27 +36,15 @@ namespace ensemble {
      */
     //% block="show musician broadcast display"
     //% group="Musician"
-    export function showMuscianBroadcastDisplay() {
-        // basic.clearScreen();
+    export function showMusicianBroadcastDisplay() {
+        basic.clearScreen();
+
         // Render channel indicators
         for (let i = 0; i < 16; i++) {
             channelLeds[i].update();
             led.plotBrightness(i % 4, Math.floor(i / 4), channelLeds[i].brightness);
         }
     }
-    
-    // /**
-    //  * Triggers for a specifc MIDI note when there is a 'Note On' MIDI message
-    //  */
-    // //% block="on MIDI note $note 'on'"
-    // //% note.min=35 note.max=127 note.defl=35
-    // //% group="Instrument"
-    // export function onNoteOn(note: number, handler: () => void): void {
-    //     if (!noteOnHandlers[note]) {
-    //         noteOnHandlers[note] = [];
-    //     }
-    //     noteOnHandlers[note].push(handler);
-    // }
     
     /**
      * Triggers for any 'Note On' MIDI message 
@@ -68,19 +55,6 @@ namespace ensemble {
     export function onAnyNoteOn(handler: (note: number, velocity: number) => void): void {
         globalNoteOnHandler = (n: number, v: number) => handler(n, v);
     }
-
-    // /**
-    //  * Triggers for a specifc MIDI note when there is a 'Note Off' MIDI message
-    //  */
-    // //% block="on MIDI note $note 'off'"
-    // //% note.min=35 note.max=127 note.defl=35
-    // //% group="Instrument"
-    // export function onNoteOff(note: number, handler: () => void): void {
-    //     if (!noteOffHandlers[note]) {
-    //         noteOffHandlers[note] = [];
-    //     }
-    //     noteOffHandlers[note].push(handler);
-    // }
 
     /**
      * Triggers for any 'Note Off' MIDI message  
@@ -157,17 +131,11 @@ namespace ensemble {
         let note = (input >> 7) & 0x7F;
         let velocity = input & 0x7F;
 
-        // && noteOffHandlers[note] !== undefined
         if (noteOnOff === 0) {
             globalNoteOnHandler(note, velocity);
-            // for (const handler of noteOffHandlers[note]) {
-            //     handler();
-            // }
+            
         } else if (noteOnOff === 1) {
             globalNoteOffHandler(note, velocity);
-            // for (const handler of noteOnHandlers[note]) {
-            //     handler();
-            // }
         }
     }
 
