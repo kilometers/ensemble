@@ -32,7 +32,7 @@ namespace ensemble {
     // a 16 item array of ChannelLed objects
     let channelLeds: ChannelLed[] = [];
     for (let i = 0; i < 16; i++) {
-        channelLeds.push(new ChannelLed(i + 1, 0, 50, 0, 255));
+        channelLeds.push(new ChannelLed(i, 0, 50, 0, 255));
     }
 
     /**
@@ -123,7 +123,7 @@ namespace ensemble {
             //...
         } else if (parsed.length > 1) {     // Midi command
             let command = (+parsed[0] >> 4) & 0x0F;
-            let channel = (+parsed[0] & 0x0F) + 1;
+            let channel = (+parsed[0] & 0x0F);
 
             const msg: MidiMessage = {
                 command,
@@ -137,13 +137,13 @@ namespace ensemble {
                 radio.setGroup(channelBand * 16 + msg.channel);
                 radio.sendNumber(note);
                 radio.setGroup(Channel.System);
-                channelLeds[msg.channel - 1].on();
+                channelLeds[msg.channel].on();
             } else if (msg.command === MidiCommand.NoteOff) {
                 let note = (0 << 14 | msg.data1 << 7 | msg.data2) & 0xFFFF;
                 radio.setGroup(channelBand * 16 + msg.channel);
                 radio.sendNumber(note);
                 radio.setGroup(Channel.System);
-                channelLeds[msg.channel - 1].off();
+                channelLeds[msg.channel].off();
             }
         }
     }
@@ -200,7 +200,6 @@ namespace ensemble {
      * The microbit will behave as an Instrument in the ensemble
      */
     //% block="be an Instrument on band $cb and channel $ch"
-    //% ch.defl=Channel._1
     //% group="Instrument"
     export function setRoleToInstrument(cb: ChannelBand, ch: Channel) {
         role = EnsembleMember.Instrument;
@@ -211,16 +210,6 @@ namespace ensemble {
 
     function calculateGroup(cb: ChannelBand, ch: Channel) {
         return cb * 16 + ch;
-    }
-
-    /**
-     * Capture midi 
-     * NOTE: Only use this in an Instrument microbit
-     */
-    //% block="debug MIDI $input from Musician"
-    //% group="Debug"
-    export function debugListenByChannel(input: number) {
-        basic.showNumber(input);
     }
 
     basic.forever(() => {
