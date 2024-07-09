@@ -14,20 +14,26 @@ namespace ensemble {
     let messages: MidiMessage[] = [];
     let pulses: number[] = [];
     let systemCommand = false;
-    
-    let channelBand = ChannelBand.Albatross;
-    let channel = Channel.System;
 
     let role = EnsembleMember.Musician;
 
-    
     let globalNoteOnHandler: (note: number, velocity: number) => void = (n: number, v: number) => { };
     let globalNoteOffHandler: (note: number, velocity: number) => void = (n: number, v: number) => { };
-    
-    // a 16 item array of ChannelLed objects
-    let channelLeds: ChannelLed[] = [];
-    for (let i = 0; i < 16; i++) {
-        channelLeds.push(new ChannelLed(i));
+
+    /**
+     * Update the display to show the current broadcast status
+     * NOTE: Only use this in an Instrument microbit
+     */
+    //% block="show instrument note display"
+    //% group="Instrument"
+    export function showInstrumentNoteDisplay() {
+        basic.clearScreen();
+
+        // Render note indicators
+        for (let i = 0; i < 25; i++) {
+            noteLeds[i].update();
+            led.plotBrightness(i % 4, Math.floor(i / 4), noteLeds[i].brightness);
+        }
     }
 
     /**
@@ -108,13 +114,13 @@ namespace ensemble {
                 radio.setGroup(channelBand * 16 + msg.channel);
                 radio.sendNumber(note);
                 radio.setGroup(Channel.System);
-                channelLeds[msg.channel].activate();
+                channelLeds[msg.channel].activate(msg.data2);
             } else if (msg.command === MidiCommand.NoteOff) {
                 let note = (0 << 14 | msg.data1 << 7 | msg.data2) & 0xFFFF;
                 radio.setGroup(channelBand * 16 + msg.channel);
                 radio.sendNumber(note);
                 radio.setGroup(Channel.System);
-                channelLeds[msg.channel].activate();
+                channelLeds[msg.channel].activate(msg.data2);
             }
         }
     }
@@ -130,12 +136,15 @@ namespace ensemble {
         let noteOnOff = (input >> 14) & 1;
         let note = (input >> 7) & 0x7F;
         let velocity = input & 0x7F;
+        let clampedNote = Math.max(0, Math.min(note - 35, 24));
 
         if (noteOnOff === 0) {
-            globalNoteOnHandler(note, velocity);
-            
-        } else if (noteOnOff === 1) {
             globalNoteOffHandler(note, velocity);
+            noteLeds[clampedNote].activate(velocity);
+        }
+        else if (noteOnOff === 1) {
+            globalNoteOnHandler(note, velocity);
+            noteLeds[clampedNote].activate(velocity);
         }
     }
 

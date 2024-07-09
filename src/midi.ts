@@ -5,6 +5,7 @@ namespace ensemble {
         data1?: number
         data2?: number
     }
+    
     export enum MidiCommand {
         Clock = 248,
         Start = 250,

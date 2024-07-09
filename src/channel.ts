@@ -53,26 +53,6 @@ namespace ensemble {
         Partridge = 14
     }
 
-    // Given a channel, this class will keep track of the brightness of the corresponding LED
-    export class ChannelLed {
-        channel: Channel;
-        brightness = 0;
-        decay = 30;
-        minBrightness =  0;
-        maxBrightness = 255;
-
-        constructor(channel: number) {
-            this.channel = channel;
-        }
-
-        activate() {  
-            this.brightness = this.maxBrightness
-        }
-
-        update() {
-            if (this.brightness > this.minBrightness) {
-                this.brightness = Math.max(this.brightness - this.decay, this.minBrightness);
-            }
-        }
-    }
+    export let channelBand = ChannelBand.Albatross;
+    export let channel = Channel.System;
 }
