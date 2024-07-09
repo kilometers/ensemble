@@ -1,40 +1,4 @@
-enum ChannelBand {
-    Albatross = 0,
-    Bananaquit = 1,
-    Cassowary = 2,
-    Dotterel = 3,
-    Emu = 4,
-    Finch = 5,
-    Garganey = 6,
-    Hoatzin = 7,
-    Ibisbill = 8,
-    Killdeer = 9,
-    Lyrebird = 10,
-    Martin = 11,
-    Nightingale = 12,
-    Osprey = 13,
-    Partridge = 14
-}
-
-enum Channel {
-    System = 0,
-    _1 = 1,
-    _2 = 2,
-    _3 = 3,
-    _4 = 4,
-    _5 = 5,
-    _6 = 6,
-    _7 = 7,
-    _8 = 8,
-    _9 = 9,
-    _10 = 10,
-    _11 = 11,
-    _12 = 12,
-    _13 = 13,
-    _14 = 14,
-    _15 = 15,
-    _16 = 16
-}
+import { Channel, ChannelBand, ChannelLed } from './channel'
 
 enum EnsembleMember {
     Conductor,
@@ -62,9 +26,29 @@ namespace ensemble {
     let noteOffHandlers: { [note: number]: (() => void)[] } = {};
     let globalNoteOnHandler: (note: number, velocity: number) => void = (n: number, v: number) => { };
     let globalNoteOffHandler: (note: number, velocity: number) => void = (n: number, v: number) => { };
+    
+    // a 16 item array of ChannelLed objects
+    let channelLeds: ChannelLed[] = [];
+    for (let i = 0; i < 16; i++) {
+        channelLeds.push(new ChannelLed(i + 1, 0, 50, 0, 255));
+    }
 
     /**
-     * On MIDI Note On
+     * Update the display to show the current broadcast status
+     * NOTE: Only use this in a Musician microbit
+     */
+    //% block="show musician broadcast display"
+    //% group="Musician"
+    export function showMuscianBroadcastDisplay() {
+        basic.clearScreen();
+        // Render channel indicators
+        for (let i = 0; i < 16; i++) {
+            led.plotBrightness(i % 4, Math.floor(i / 4), channelLeds[i].brightness);
+        }
+    }
+    
+    /**
+     * Triggers for a specifc MIDI note when there is a 'Note On' MIDI message
      */
     //% block="on MIDI note $note 'on'"
     //% note.min=35 note.max=127 note.defl=35
@@ -77,7 +61,7 @@ namespace ensemble {
     }
     
     /**
-     * On MIDI Note On
+     * Triggers for any 'Note On' MIDI message 
      */
     //% block="on MIDI message 'note on' | $note $velocity"
     //% draggableParameters="reporter"
@@ -87,7 +71,7 @@ namespace ensemble {
     }
 
     /**
-     * On MIDI Note Off
+     * Triggers for a specifc MIDI note when there is a 'Note Off' MIDI message
      */
     //% block="on MIDI note $note 'off'"
     //% note.min=35 note.max=127 note.defl=35
@@ -100,7 +84,7 @@ namespace ensemble {
     }
 
     /**
-     * On any MIDI Note Off
+     * Triggers for any 'Note Off' MIDI message  
      */
     //% block="on MIDI message 'note off' | $note $velocity"
     //% draggableParameters="reporter"
@@ -148,16 +132,16 @@ namespace ensemble {
 
             if (msg.command === MidiCommand.NoteOn) {
                 let note = (1 << 14 | msg.data1 << 7 | msg.data2) & 0xFFFF;
-                basic.showIcon(IconNames.Surprised, 0);
                 radio.setGroup(channelBand * 16 + msg.channel);
                 radio.sendNumber(note);
                 radio.setGroup(Channel.System);
+                channelLeds[msg.channel - 1].on();
             } else if (msg.command === MidiCommand.NoteOff) {
                 let note = (0 << 14 | msg.data1 << 7 | msg.data2) & 0xFFFF;
-                basic.showIcon(IconNames.Happy, 0);
                 radio.setGroup(channelBand * 16 + msg.channel);
                 radio.sendNumber(note);
                 radio.setGroup(Channel.System);
+                channelLeds[msg.channel - 1].off();
             }
         }
     }
