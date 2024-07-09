@@ -24,8 +24,8 @@ namespace ensemble {
 
     let role = EnsembleMember.Musician;
 
-    let noteOnHandlers: { [note: number]: (() => void)[] } = {};
-    let noteOffHandlers: { [note: number]: (() => void)[] } = {};
+    // let noteOnHandlers: { [note: number]: (() => void)[] } = {};
+    // let noteOffHandlers: { [note: number]: (() => void)[] } = {};
     let globalNoteOnHandler: (note: number, velocity: number) => void = (n: number, v: number) => { };
     let globalNoteOffHandler: (note: number, velocity: number) => void = (n: number, v: number) => { };
     
@@ -49,18 +49,18 @@ namespace ensemble {
         }
     }
     
-    /**
-     * Triggers for a specifc MIDI note when there is a 'Note On' MIDI message
-     */
-    //% block="on MIDI note $note 'on'"
-    //% note.min=35 note.max=127 note.defl=35
-    //% group="Instrument"
-    export function onNoteOn(note: number, handler: () => void): void {
-        if (!noteOnHandlers[note]) {
-            noteOnHandlers[note] = [];
-        }
-        noteOnHandlers[note].push(handler);
-    }
+    // /**
+    //  * Triggers for a specifc MIDI note when there is a 'Note On' MIDI message
+    //  */
+    // //% block="on MIDI note $note 'on'"
+    // //% note.min=35 note.max=127 note.defl=35
+    // //% group="Instrument"
+    // export function onNoteOn(note: number, handler: () => void): void {
+    //     if (!noteOnHandlers[note]) {
+    //         noteOnHandlers[note] = [];
+    //     }
+    //     noteOnHandlers[note].push(handler);
+    // }
     
     /**
      * Triggers for any 'Note On' MIDI message 
@@ -72,18 +72,18 @@ namespace ensemble {
         globalNoteOnHandler = (n: number, v: number) => handler(n, v);
     }
 
-    /**
-     * Triggers for a specifc MIDI note when there is a 'Note Off' MIDI message
-     */
-    //% block="on MIDI note $note 'off'"
-    //% note.min=35 note.max=127 note.defl=35
-    //% group="Instrument"
-    export function onNoteOff(note: number, handler: () => void): void {
-        if (!noteOffHandlers[note]) {
-            noteOffHandlers[note] = [];
-        }
-        noteOffHandlers[note].push(handler);
-    }
+    // /**
+    //  * Triggers for a specifc MIDI note when there is a 'Note Off' MIDI message
+    //  */
+    // //% block="on MIDI note $note 'off'"
+    // //% note.min=35 note.max=127 note.defl=35
+    // //% group="Instrument"
+    // export function onNoteOff(note: number, handler: () => void): void {
+    //     if (!noteOffHandlers[note]) {
+    //         noteOffHandlers[note] = [];
+    //     }
+    //     noteOffHandlers[note].push(handler);
+    // }
 
     /**
      * Triggers for any 'Note Off' MIDI message  
@@ -150,26 +150,27 @@ namespace ensemble {
 
     // TODO: Make it safe, it is not safe
     /**
-     * Capture midi 
-     * NOTE: Only use this in an Instrument microbit
+     * Trigger midi events based on input
+     * input should be 
      */
-    //% block="catch MIDI $input from Musician"
+    //% block="trigger MIDI event $input"
     //% group="Instrument"
-    export function catchMidi(input: number) {
+    export function triggerMIDIEvents(input: number) {
         let noteOnOff = (input >> 14) & 1;
         let note = (input >> 7) & 0x7F;
         let velocity = input & 0x7F;
 
-        if (noteOnOff === 0 && noteOffHandlers[note] !== undefined) {
+        // && noteOffHandlers[note] !== undefined
+        if (noteOnOff === 0) {
             globalNoteOnHandler(note, velocity);
-            for (const handler of noteOffHandlers[note]) {
-                handler();
-            }
-        } else if (noteOnOff === 1 && noteOnHandlers[note] !== undefined) {
+            // for (const handler of noteOffHandlers[note]) {
+            //     handler();
+            // }
+        } else if (noteOnOff === 1) {
             globalNoteOffHandler(note, velocity);
-            for (const handler of noteOnHandlers[note]) {
-                handler();
-            }
+            // for (const handler of noteOnHandlers[note]) {
+            //     handler();
+            // }
         }
     }
 
