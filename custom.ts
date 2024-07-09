@@ -28,7 +28,7 @@ namespace ensemble {
     // a 16 item array of ChannelLed objects
     let channelLeds: ChannelLed[] = [];
     for (let i = 0; i < 16; i++) {
-        channelLeds.push(new ChannelLed(i, 0, 50, 0, 255));
+        channelLeds.push(new ChannelLed(i));
     }
 
     /**

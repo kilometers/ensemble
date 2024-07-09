@@ -56,18 +56,14 @@ namespace ensemble {
     // Given a channel, this class will keep track of the brightness of the corresponding LED
     export class ChannelLed {
         channel: Channel;
-        brightness: number;
-        decay: number;
-        minBrightness: number;
-        maxBrightness: number;
-        state: boolean;
+        brightness = 0;
+        decay = 2;
+        minBrightness =  0;
+        maxBrightness = 255;
+        state = false;
 
-        constructor(channel: number, brightness: number, decay: number, minBrightness: number, maxBrightness: number) {
+        constructor(channel: number) {
             this.channel = channel;
-            this.brightness = brightness;
-            this.decay = decay;
-            this.minBrightness = minBrightness;
-            this.maxBrightness = maxBrightness;
         }
 
         on() {  
