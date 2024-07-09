@@ -11,7 +11,8 @@
         "main.ts",
         "README.md",
         "custom.ts",
-        "channel.ts"
+        "src/channel.ts",
+        "src/midi.ts"
     ],
     "testFiles": [
         "test.ts"

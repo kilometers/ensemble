@@ -1,7 +1,3 @@
-import ChannelBand = channelSpace.ChannelBand;
-import Channel = channelSpace.Channel;
-import ChannelLed = channelSpace.ChannelLed;
-
 enum EnsembleMember {
     Conductor,
     Musician,
@@ -300,20 +296,7 @@ enum STATE {
     ERROR
 }
 let state: STATE = STATE.IDLE;
-interface MidiMessage {
-    command: MidiCommand
-    channel?: Channel
-    data1?: number
-    data2?: number
-}
-enum MidiCommand {
-    Clock = 248,
-    Start = 250,
-    Continue = 251,
-    Stop = 252,
-    NoteOn = 9,
-    NoteOff = 8
-}
+
 
 class Pulse {
     pin: DigitalPin

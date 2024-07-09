@@ -1,7 +1,4 @@
-
-
-namespace channelSpace {
-
+namespace ensemble {
     export enum Channel {
         System = 255,
         _1 = 0,
