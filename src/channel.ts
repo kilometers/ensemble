@@ -57,28 +57,20 @@ namespace ensemble {
     export class ChannelLed {
         channel: Channel;
         brightness = 0;
-        decay = 50;
+        decay = 30;
         minBrightness =  0;
         maxBrightness = 255;
-        state = false;
 
         constructor(channel: number) {
             this.channel = channel;
         }
 
-        on() {  
-            this.state = true;
-        }
-
-        off() {
-            this.state = false;
+        activate() {  
+            this.brightness = this.maxBrightness
         }
 
         update() {
-            if (this.state) {
-                this.brightness = this.maxBrightness;
-            }
-            else if (this.brightness > this.minBrightness) {
+            if (this.brightness > this.minBrightness) {
                 this.brightness = Math.max(this.brightness - this.decay, this.minBrightness);
             }
         }

@@ -38,10 +38,6 @@ namespace ensemble {
     //% block="show musician broadcast display"
     //% group="Musician"
     export function showMuscianBroadcastDisplay() {
-        if (Math.random() > 0.5) {
-            channelLeds[Math.floor(Math.random() * 15)].on();
-            channelLeds[Math.floor(Math.random() * 15)].off();
-        }
         // basic.clearScreen();
         // Render channel indicators
         for (let i = 0; i < 16; i++) {
@@ -138,13 +134,13 @@ namespace ensemble {
                 radio.setGroup(channelBand * 16 + msg.channel);
                 radio.sendNumber(note);
                 radio.setGroup(Channel.System);
-                channelLeds[msg.channel].on();
+                channelLeds[msg.channel].activate();
             } else if (msg.command === MidiCommand.NoteOff) {
                 let note = (0 << 14 | msg.data1 << 7 | msg.data2) & 0xFFFF;
                 radio.setGroup(channelBand * 16 + msg.channel);
                 radio.sendNumber(note);
                 radio.setGroup(Channel.System);
-                channelLeds[msg.channel].off();
+                channelLeds[msg.channel].activate();
             }
         }
     }
