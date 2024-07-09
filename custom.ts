@@ -1,4 +1,6 @@
-import { Channel, ChannelBand, ChannelLed } from './channel'
+import ChannelBand = channelSpace.ChannelBand;
+import Channel = channelSpace.Channel;
+import ChannelLed = channelSpace.ChannelLed;
 
 enum EnsembleMember {
     Conductor,
