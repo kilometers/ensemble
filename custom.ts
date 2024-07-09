@@ -19,38 +19,6 @@ namespace ensemble {
 
     let globalNoteOnHandler: (note: number, velocity: number) => void = (n: number, v: number) => { };
     let globalNoteOffHandler: (note: number, velocity: number) => void = (n: number, v: number) => { };
-
-    /**
-     * Update the display to show the current broadcast status
-     * NOTE: Only use this in an Instrument microbit
-     */
-    //% block="show instrument note display"
-    //% group="Instrument"
-    export function showInstrumentNoteDisplay() {
-        basic.clearScreen();
-
-        // Render note indicators
-        for (let i = 0; i < 25; i++) {
-            noteLeds[i].update();
-            led.plotBrightness(i % 4, Math.floor(i / 4), noteLeds[i].brightness);
-        }
-    }
-
-    /**
-     * Update the display to show the current broadcast status
-     * NOTE: Only use this in a Musician microbit
-     */
-    //% block="show musician broadcast display"
-    //% group="Musician"
-    export function showMusicianBroadcastDisplay() {
-        basic.clearScreen();
-
-        // Render channel indicators
-        for (let i = 0; i < 16; i++) {
-            channelLeds[i].update();
-            led.plotBrightness(i % 4, Math.floor(i / 4), channelLeds[i].brightness);
-        }
-    }
     
     /**
      * Triggers for any 'Note On' MIDI message 
@@ -114,13 +82,13 @@ namespace ensemble {
                 radio.setGroup(channelBand * 16 + msg.channel);
                 radio.sendNumber(note);
                 radio.setGroup(Channel.System);
-                channelLeds[msg.channel].activate(msg.data2);
+                activateChannelLed(msg.channel, msg.data2);
             } else if (msg.command === MidiCommand.NoteOff) {
                 let note = (0 << 14 | msg.data1 << 7 | msg.data2) & 0xFFFF;
                 radio.setGroup(channelBand * 16 + msg.channel);
                 radio.sendNumber(note);
                 radio.setGroup(Channel.System);
-                channelLeds[msg.channel].activate(msg.data2);
+                activateChannelLed(msg.channel, msg.data2);
             }
         }
     }
@@ -140,11 +108,11 @@ namespace ensemble {
 
         if (noteOnOff === 0) {
             globalNoteOffHandler(note, velocity);
-            noteLeds[clampedNote].activate(velocity);
+            activateNoteLed(clampedNote, velocity);
         }
         else if (noteOnOff === 1) {
             globalNoteOnHandler(note, velocity);
-            noteLeds[clampedNote].activate(velocity);
+            activateNoteLed(clampedNote, velocity);
         }
     }
 
