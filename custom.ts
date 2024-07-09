@@ -147,7 +147,7 @@ namespace ensemble {
     // TODO: Make it safe, it is not safe
     /**
      * Trigger midi events based on input
-     * input should be 
+     * input should be a 16-bit number
      */
     //% block="trigger MIDI event $input"
     //% group="Instrument"
