@@ -58,9 +58,9 @@ namespace ensemble {
      * Capture midi and route it to the appropriate channels over radio
      * NOTE: Only use this in a Musician microbit
      */
-    //% block="send MIDI $input to Instruments"
+    //% block="send MIDI $input to $cb"
     //% group="MIDI"
-    export function sendMidiByChannel(input: string) {
+    export function broadcastMidiToBand(input: string, cb: ChannelBand) {
         let parsed = input.split(",");
         if (+parsed[0] > 248) {             // System message
             radio.setGroup(Channel.System);
@@ -80,13 +80,13 @@ namespace ensemble {
 
             if (msg.command === MidiCommand.NoteOn) {
                 let note = (1 << 14 | msg.data1 << 7 | msg.data2) & 0xFFFF;
-                radio.setGroup(channelBand * 16 + msg.channel);
+                radio.setGroup(cb * 16 + msg.channel);
                 radio.sendNumber(note);
                 radio.setGroup(Channel.System);
                 activateChannelLed(msg.channel, msg.data2);
             } else if (msg.command === MidiCommand.NoteOff) {
                 let note = (0 << 14 | msg.data1 << 7 | msg.data2) & 0xFFFF;
-                radio.setGroup(channelBand * 16 + msg.channel);
+                radio.setGroup(cb * 16 + msg.channel);
                 radio.sendNumber(note);
                 radio.setGroup(Channel.System);
                 activateChannelLed(msg.channel, msg.data2);
@@ -135,7 +135,6 @@ namespace ensemble {
     //% group="Roles"
     export function setRoleToMusician(cb: ChannelBand) {
         role = EnsembleMember.Musician;
-        channelBand = cb;
         channel = Channel.System;
         radio.setGroup(Channel.System);
     }

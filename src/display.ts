@@ -1,5 +1,5 @@
 namespace ensemble {
-    
+
     export let lowestNoteForNoteDisplay = 35;
     
     /* This is a class that represents an LED 
@@ -65,7 +65,7 @@ namespace ensemble {
      * NOTE: Only use this in an Instrument microbit
      * @param note the lowest note to display
      */
-    //% block="display received notes starting at note $note"
+    //% block="display received MIDI notes starting at note $note"
     //% note.min=0 note.max=127
     //% note.defl=35
     //% group="Display"
@@ -85,7 +85,7 @@ namespace ensemble {
      * Update the display to show the current broadcast status
      * NOTE: Only use this in a Musician microbit
      */
-    //% block="display sent midi"
+    //% block="display sent MIDI notes"
     //% group="Display"
     export function showSentMidiDisplay() {
         basic.clearScreen();
