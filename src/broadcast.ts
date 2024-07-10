@@ -17,12 +17,13 @@ namespace ensemble {
     }
 
     export function broadcastMessages() {
-        let buffersToSend: Map<number, number[]> = new Map();
+        let experimentalBuffersToSend: { [key: number]: number[] } = {};
         let count = 0;
         while (count < broadcastQueueMaxCutoff && broadcastQueue.length > 0) {
             let message = broadcastQueue.shift();
             if (message.type == "note") {
-                const [firstData, secondData] = broadcastQueue.splice(0, 2);
+                const firstData = broadcastQueue.shift();
+                const secondData = broadcastQueue.shift();
                 if (firstData
                     && secondData
                     && firstData.type == "data"
@@ -30,21 +31,19 @@ namespace ensemble {
                     && firstData.group == message.group
                     && secondData.group == message.group)
                 {
-                    let buffer = buffersToSend.get(message.group);
-                    if (!buffer) {
-                        buffer = [];
+                    if (!experimentalBuffersToSend[message.group]) {
+                        experimentalBuffersToSend[message.group] = [];
                     }
-                    buffer.push(message.byte);
-                    buffer.push(firstData.byte);
-                    buffer.push(secondData.byte);
-                    buffersToSend.set(message.group, buffer);
+                    experimentalBuffersToSend[message.group].push(message.byte);
+                    experimentalBuffersToSend[message.group].push(firstData.byte);
+                    experimentalBuffersToSend[message.group].push(secondData.byte);
                 }
             }
-            buffersToSend.forEach((value, key) => {
-                const buffer = pins.createBufferFromArray(value);
-                radio.setGroup(key);
+            for (let key in experimentalBuffersToSend) {
+                const buffer = pins.createBufferFromArray(experimentalBuffersToSend[key]);
+                radio.setGroup(+key);
                 radio.sendBuffer(buffer);
-            });
+            }
 
             count++;
         }
