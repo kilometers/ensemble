@@ -56,40 +56,46 @@ namespace ensemble {
      * Capture midi and route it to the appropriate channels over radio
      * NOTE: Only use this in a Musician microbit
      */
-    //% block="broadcast MIDI $input to $cb"
+    //% block="broadcast MIDI to $cb"
     //% group="MIDI"
-    export function broadcastMidiToBand(input: string, cb: ChannelBand) {
-        let byte = +input;
+    export function broadcastMidiToBand(cb: ChannelBand) {
+        let raw = serial.readString();
+        if (raw.length == 0) return;
+        
+        let buffer = Buffer.fromUTF8(raw);
 
-        if (byte < 240) {                     // Midi command
-            if (dataCount > 0) {
-                queueBroadcastMessage({
-                    group: cb * 16 + lastMIDIChannel,
-                    type: "data",
-                    byte
-                });
-                dataCount--;
-            } else {
-                lastMIDICommand = (byte >> 4) & 0x0F;
-                lastMIDIChannel = byte & 0x0F;
-                queueBroadcastMessage({
-                    group: cb * 16 + lastMIDIChannel,
-                    type: "note",
-                    byte
-                });
-                dataCount = 2;
-            } 
+        for (let i = 0; i < buffer.length; i++) {
+            let byte = buffer[i];
 
-        } else if (byte > 248) {             // System message
-            lastMIDICommand = byte;
-            lastMIDIChannel = Channel.System;
-            radio.setGroup(Channel.System);
-            radio.sendNumber(byte);
-        } else if (byte == 248) {     // Midi Clock
-            // ...
+            if (byte < 240) {                     // Midi command
+                if (dataCount > 0) {
+                    queueBroadcastMessage({
+                        group: cb * 16 + lastMIDIChannel,
+                        type: "data",
+                        byte
+                    });
+                    dataCount--;
+                } else {
+                    lastMIDICommand = (byte >> 4) & 0x0F;
+                    lastMIDIChannel = byte & 0x0F;
+                    queueBroadcastMessage({
+                        group: cb * 16 + lastMIDIChannel,
+                        type: "note",
+                        byte
+                    });
+                    dataCount = 2;
+                } 
+
+            } else if (byte > 248) {             // System message
+                lastMIDICommand = byte;
+                lastMIDIChannel = Channel.System;
+                radio.setGroup(Channel.System);
+                radio.sendNumber(byte);
+            } else if (byte == 248) {     // Midi Clock
+                // ...
+            }
         }
     }
-
 
     /**
      * On radio received buffer

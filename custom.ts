@@ -29,6 +29,7 @@ namespace ensemble {
         serial.setBaudRate(BaudRate.BaudRate115200)
         serial.redirectToUSB()
     }
+        
 
     /**
      * The microbit will behave as a Conductor in the ensemble
