@@ -20,9 +20,11 @@ namespace ensemble {
         let experimentalBuffersToSend: number[][] = [];
         let count = 0;
         while (count < broadcastQueueMaxCutoff && broadcastQueue.length > 0) {
-            let message = broadcastQueue.shift();
+            let message = broadcastQueue[0];
             if (message.type == "note") {
-                if (broadcastQueue.length < 2) break;
+                if (broadcastQueue.length < 3) break;
+
+                broadcastQueue.shift();
                 const firstData = broadcastQueue.shift();
                 const secondData = broadcastQueue.shift();
                 if (firstData
@@ -39,7 +41,7 @@ namespace ensemble {
                     experimentalBuffersToSend[message.group].push(firstData.byte);
                     experimentalBuffersToSend[message.group].push(secondData.byte);
                 }
-            } else if (message.type == "data") {
+            }
 
             experimentalBuffersToSend.forEach((val, key) => {
                 if (experimentalBuffersToSend[key]) {
