@@ -1,5 +1,6 @@
 namespace ensemble {
     let broadcastQueue: BroadcastMessage[] = [];
+    let leftOver: number[] = [];
     const broadcastQueueMaxCutoff = 10;
     export let lastMIDIChannel: Channel;
     export let lastMIDICommand: MidiCommand;
@@ -16,48 +17,32 @@ namespace ensemble {
         broadcastQueue.push(bm);
     }
 
-    export function broadcastMessages() {
-        let experimentalBuffersToSend: number[][] = [];
-        let count = 0;
-        while (count < broadcastQueueMaxCutoff && broadcastQueue.length > 0) {
-            let message = broadcastQueue[0];
-            if (message.type == "note") {
-                if (broadcastQueue.length < 3) break;
+    export function broadcastMessages() {   
+        let buffers = generateBufferToSend();
 
-                broadcastQueue.shift();
-                const firstData = broadcastQueue.shift();
-                const secondData = broadcastQueue.shift();
-                if (firstData
-                    && secondData
-                    && firstData.type == "data"
-                    && secondData.type == "data"
-                    && firstData.group == message.group
-                    && secondData.group == message.group)
-                {
-                    if (!experimentalBuffersToSend[message.group]) {
-                        experimentalBuffersToSend[message.group] = [];
-                    }
-                    experimentalBuffersToSend[message.group].push(message.byte);
-                    experimentalBuffersToSend[message.group].push(firstData.byte);
-                    experimentalBuffersToSend[message.group].push(secondData.byte);
-                }
+        buffers.forEach((val, key) => {
+            if (buffers[key]) {
+                const bufferToSend = pins.createBufferFromArray(buffers[key]);
+                radio.setGroup(key);
+                radio.sendBuffer(bufferToSend);
+                activateChannelLed(key, 127);
             }
+        });
 
-            experimentalBuffersToSend.forEach((val, key) => {
-                if (experimentalBuffersToSend[key]) {
-                    const bufferToSend = pins.createBufferFromArray(experimentalBuffersToSend[key]);
-                    radio.setGroup(key);
-                    radio.sendBuffer(bufferToSend);
-                    activateChannelLed(key, 127);
-                }
-            });
-
-            experimentalBuffersToSend = [];
-
-            count++;
-        }
-        
         radio.setGroup(channel);
+    }
+
+    function generateBufferToSend() {
+        let experimentalBuffersToSend: number[][] = [];
+
+        while (broadcastQueue.length > 0) {
+            let msg = broadcastQueue.shift();
+            if (!experimentalBuffersToSend[msg.group])
+                experimentalBuffersToSend[msg.group] = []
+            experimentalBuffersToSend[msg.group].push(msg.byte)
+        }
+
+        return experimentalBuffersToSend
     }
 
     // TODO: Go back to using normal midi format?
@@ -83,6 +68,7 @@ namespace ensemble {
                 
                 else if (byte >> 4 === 0x8 || byte >> 4 === 0x9) { // Note off or on
                     lastMIDIChannel = byte & 0x0F;
+
                     queueBroadcastMessage({
                         group: cb * 16 + lastMIDIChannel,
                         type: "note",
