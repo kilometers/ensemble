@@ -1,6 +1,6 @@
 namespace ensemble {
     let broadcastQueue: BroadcastMessage[] = [];
-    const broadcastQueueMaxCutoff = 5;
+    const broadcastQueueMaxCutoff = 10;
     
     export interface BroadcastMessage {
         group: number;
