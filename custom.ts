@@ -58,7 +58,7 @@ namespace ensemble {
      * Capture midi and route it to the appropriate channels over radio
      * NOTE: Only use this in a Musician microbit
      */
-    //% block="send MIDI $input to $cb"
+    //% block="broadcast MIDI $input to $cb"
     //% group="MIDI"
     export function broadcastMidiToBand(input: string, cb: ChannelBand) {
         let parsed = input.split(",");
@@ -131,9 +131,9 @@ namespace ensemble {
     /**
      * The microbit will behave as a Musican in the ensemble
      */
-    //% block="be a Musician on band $cb"
+    //% block="be a Musician"
     //% group="Roles"
-    export function setRoleToMusician(cb: ChannelBand) {
+    export function setRoleToMusician() {
         role = EnsembleMember.Musician;
         channel = Channel.System;
         radio.setGroup(Channel.System);
