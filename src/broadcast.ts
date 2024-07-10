@@ -40,10 +40,15 @@ namespace ensemble {
                 }
             }
             experimentalBuffersToSend.forEach((val, key) => {
-                const bufferToSend = pins.createBufferFromArray(experimentalBuffersToSend[key]);
-                radio.setGroup(key);
-                radio.sendBuffer(bufferToSend);
+                if (experimentalBuffersToSend[key]) {
+                    const bufferToSend = pins.createBufferFromArray(experimentalBuffersToSend[key]);
+                    radio.setGroup(key);
+                    radio.sendBuffer(bufferToSend);
+                    activateChannelLed(key, 127);
+                }
             });
+
+            experimentalBuffersToSend = [];
 
             count++;
         }
