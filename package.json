@@ -1,5 +1,6 @@
 {
   "dependencies": {
+    "@types/node": "^20.14.10",
     "pxt-microbit": "^7.0.13"
   }
 }
