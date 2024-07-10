@@ -44,7 +44,7 @@ namespace ensemble {
      * Trigger midi events based on input
      * input should be a buffer of midi messages (3 bytes each)
      */
-    //% block="trigger MIDI event $input"
+    //% block="trigger MIDI event $buffer"
     //% group="MIDI"
     export function triggerMIDIEvents(buffer: Buffer) {
         // Midi message has at least 3 bytes
