@@ -17,7 +17,7 @@ namespace ensemble {
     }
 
     export function broadcastMessages() {
-        let experimentalBuffersToSend: { [key: number]: number[] } = {};
+        let experimentalBuffersToSend: number[][] = [];
         let count = 0;
         while (count < broadcastQueueMaxCutoff && broadcastQueue.length > 0) {
             let message = broadcastQueue.shift();
@@ -39,11 +39,11 @@ namespace ensemble {
                     experimentalBuffersToSend[message.group].push(secondData.byte);
                 }
             }
-            for (let key in experimentalBuffersToSend) {
-                const buffer = pins.createBufferFromArray(experimentalBuffersToSend[key]);
-                radio.setGroup(+key);
-                radio.sendBuffer(buffer);
-            }
+            experimentalBuffersToSend.forEach((val, key) => {
+                const bufferToSend = pins.createBufferFromArray(experimentalBuffersToSend[key]);
+                radio.setGroup(key);
+                radio.sendBuffer(bufferToSend);
+            });
 
             count++;
         }
