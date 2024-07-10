@@ -8,7 +8,7 @@ enum EnsembleMember {
  * Ensemble action
  */
 //% color=190 weight=100 icon="\uf001" block="Ensemble"
-//% groups=['Debug', 'Musician', 'Instrument', 'Conductor']
+//% groups=['Roles', 'Display', 'MIDI']
 namespace ensemble {
     let systemStatusTimer = 0;
     let messages: MidiMessage[] = [];
@@ -25,7 +25,7 @@ namespace ensemble {
      */
     //% block="on MIDI message 'note on' | $note $velocity"
     //% draggableParameters="reporter"
-    //% group="Instrument"
+    //% group="MIDI"
     export function onAnyNoteOn(handler: (note: number, velocity: number) => void): void {
         globalNoteOnHandler = (n: number, v: number) => handler(n, v);
     }
@@ -35,7 +35,7 @@ namespace ensemble {
      */
     //% block="on MIDI message 'note off' | $note $velocity"
     //% draggableParameters="reporter"
-    //% group="Instrument"
+    //% group="MIDI"
     export function onAnyNoteOff(handler: (note: number, velocity: number) => void): void {
         globalNoteOffHandler = (n: number, v: number) => handler(n, v);
     }
@@ -45,6 +45,7 @@ namespace ensemble {
      * NOTE: Used by the Musican and the Conductor
      */
     //% block="initialize serial for MIDI"
+    //% group="MIDI"
     export function initSerialForMidi(): void {
         serial.setTxBufferSize(64)
         serial.setRxBufferSize(64)
@@ -57,9 +58,9 @@ namespace ensemble {
      * Capture midi and route it to the appropriate channels over radio
      * NOTE: Only use this in a Musician microbit
      */
-    //% block="route MIDI $input to Instruments"
-    //% group="Musician"
-    export function routeMidiByChannel(input: string) {
+    //% block="send MIDI $input to Instruments"
+    //% group="MIDI"
+    export function sendMidiByChannel(input: string) {
         let parsed = input.split(",");
         if (+parsed[0] > 248) {             // System message
             radio.setGroup(Channel.System);
@@ -94,17 +95,18 @@ namespace ensemble {
     }
 
     // TODO: Make it safe, it is not safe
+    // TODO: Go back to using normal midi format?
     /**
      * Trigger midi events based on input
      * input should be a 16-bit number
      */
     //% block="trigger MIDI event $input"
-    //% group="Instrument"
+    //% group="MIDI"
     export function triggerMIDIEvents(input: number) {
         let noteOnOff = (input >> 14) & 1;
         let note = (input >> 7) & 0x7F;
         let velocity = input & 0x7F;
-        let clampedNote = Math.max(0, Math.min(note - 35, 24));
+        let clampedNote = Math.max(0, Math.min(note - lowestNoteForNoteDisplay, 24));
 
         if (noteOnOff === 0) {
             globalNoteOffHandler(note, velocity);
@@ -120,7 +122,7 @@ namespace ensemble {
      * The microbit will behave as a Conductor in the ensemble
      */
     //% block="be a Conductor"
-    //% group="Conductor"
+    //% group="Roles"
     export function setRoleToConductor(r: EnsembleMember) {
         role = r;
         radio.setGroup(Channel.System);
@@ -130,7 +132,7 @@ namespace ensemble {
      * The microbit will behave as a Musican in the ensemble
      */
     //% block="be a Musician on band $cb"
-    //% group="Musician"
+    //% group="Roles"
     export function setRoleToMusician(cb: ChannelBand) {
         role = EnsembleMember.Musician;
         channelBand = cb;
@@ -142,7 +144,7 @@ namespace ensemble {
      * The microbit will behave as an Instrument in the ensemble
      */
     //% block="be an Instrument on band $cb and channel $ch"
-    //% group="Instrument"
+    //% group="Roles"
     export function setRoleToInstrument(cb: ChannelBand, ch: Channel) {
         role = EnsembleMember.Instrument;
         channelBand = cb;
@@ -152,6 +154,35 @@ namespace ensemble {
 
     function calculateGroup(cb: ChannelBand, ch: Channel) {
         return cb * 16 + ch;
+    }
+
+    /*
+     * Convert a 24-bit number to a MidiMessage
+     * @param input 24-bit number
+     */
+    function parseMidiMessage(input: number): MidiMessage {
+
+        let command = (input >> 16) & 0xFF;
+        let data1 = (input >> 8) & 0xFF;
+        let data2 = input & 0xFF;
+
+        if (command > 248) {
+            return {
+                command
+            }
+        }
+
+        // Midi Clock, be careful with this
+        // if (command === 248) {
+        //     // ...
+        // }
+
+        return {
+            command: command >> 4 & 0x0F,
+            channel: command & 0x0F,
+            data1,
+            data2
+        }
     }
 
     basic.forever(() => {
@@ -172,68 +203,7 @@ namespace ensemble {
                 });
                 break;
         }
-    })
-
-    // TODO: Move display logic into a separate area
-    basic.forever(function () {
-        switch (state) {
-            case STATE.IDLE:
-                break;
-            case STATE.BROADCASTING:
-                let commandDisplayed = undefined;
-                if (systemStatusTimer == 0 && messages.length > 0) {
-                    commandDisplayed = MidiCommand.NoteOff;
-                    for (const msg2 of messages) {
-                        if (msg2.command > 248) {
-                            systemStatusTimer = 30;
-                            commandDisplayed = msg2.command;
-                            break;
-                        }
-                        else if (msg2.command === MidiCommand.NoteOn) {
-                            commandDisplayed = MidiCommand.NoteOn;
-                            let note = (1 << 14 || msg2.data1 << 7 || msg2.data2) && 0xFFFF;
-                            // pulses.push(new Pulse())
-                        }
-                    }
-                    messages = []
-                } else if (systemStatusTimer > 0) {
-                    systemStatusTimer -= 1;
-                }
-                switch (commandDisplayed) {
-                    case MidiCommand.Continue:
-                    case MidiCommand.Start:
-                        basic.showLeds(`
-                . # . . .
-                . # # . .
-                . # # # .
-                . # # . .
-                . # . . .
-                `, 0);
-                        break;
-                    case MidiCommand.Stop:
-                        basic.showLeds(`
-                # # . # #
-                # # . # #
-                # # . # #
-                # # . # #
-                # # . # #
-                `, 0);
-                        break;
-                    case MidiCommand.NoteOn:
-                        basic.showIcon(IconNames.Surprised, 0);
-                        break;
-                    case MidiCommand.NoteOff:
-                        basic.showIcon(IconNames.Happy, 0);
-                        break;
-                }
-                break;
-            case STATE.ERROR:
-                basic.showIcon(IconNames.Skull, 0);
-                break;
-        }
-    })
-
-    basic.showIcon(IconNames.Happy, 0);
+    });
 }
 
 enum STATE {
@@ -255,23 +225,3 @@ class Pulse {
         this.duration = duration | 40;
     }
 }
-
-// let msg = serial.readLine().split(",")
-//         if (+msg[0] > 248) {
-//             // System message
-//             messages.push({
-//                 command: +msg[0]
-//             })
-//         } else if (+msg[0] == 248) {
-//             // Midi Clock
-//         } else {
-//             // Midi command
-//             let command = (+msg[0] >> 4) & 0x0F;
-//             let channel = +msg[0] & 0x0F;
-//             messages.push({
-//                 command,
-//                 channel,
-//                 data1: msg[1] ? +msg[1] : undefined,
-//                 data2: msg[2] ? +msg[2] : undefined
-//             })
-//         }

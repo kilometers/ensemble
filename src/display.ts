@@ -1,6 +1,10 @@
 namespace ensemble {
     
-    // This is a class that represents an LED that can be pulsed on and slowly fade off.
+    export let lowestNoteForNoteDisplay = 35;
+    
+    /* This is a class that represents an LED 
+     * which can be pulsed on and slowly fade off.
+     */
     export class IndicatorLed {
         brightness = 0;
         decay = 30;
@@ -22,7 +26,8 @@ namespace ensemble {
         }
     }
 
-    // a 16 item array of ChannelLed objects
+    // a 16 item array of IndicatorLed objects
+    // representing 16 MIDI channels
     let channelLeds: IndicatorLed[] = [];
     for (let i = 0; i < 16; i++) {
         channelLeds.push(new IndicatorLed());
@@ -35,10 +40,22 @@ namespace ensemble {
         noteLeds.push(new IndicatorLed());
     }
 
+    /*
+     * Activate a channel LED
+     * Channel LED's occupy the top left 4x4 grid of the microbit's LED display
+     * @param index the index of the LED to activate
+     * @param strength the strength of the activation (0-127)
+     */
     export function activateChannelLed(index: number, strength: number) {
         channelLeds[index].activate(strength);
     }
 
+    /*
+     * Activate a note LED
+     * Note LED's occupy the 5x5 grid of the microbit's LED display
+     * @param index the index of the LED to activate
+     * @param strength the strength of the activation (0-127)
+     */
     export function activateNoteLed(index: number, strength: number) {
         noteLeds[index].activate(strength);
     }
@@ -46,10 +63,15 @@ namespace ensemble {
     /**
      * Update the display to show the current broadcast status
      * NOTE: Only use this in an Instrument microbit
+     * @param note the lowest note to display
      */
-    //% block="show instrument note display"
-    //% group="Instrument"
-    export function showInstrumentNoteDisplay() {
+    //% block="display received notes starting at note $note"
+    //% note.min=0 note.max=127
+    //% note.defl=35
+    //% group="Display"
+    export function showReceivedNoteDisplay(note: number) {
+        lowestNoteForNoteDisplay = note;
+
         basic.clearScreen();
 
         // Render note indicators
@@ -63,9 +85,9 @@ namespace ensemble {
      * Update the display to show the current broadcast status
      * NOTE: Only use this in a Musician microbit
      */
-    //% block="show musician broadcast display"
-    //% group="Musician"
-    export function showMusicianBroadcastDisplay() {
+    //% block="display sent midi"
+    //% group="Display"
+    export function showSentMidiDisplay() {
         basic.clearScreen();
 
         // Render channel indicators
