@@ -1,4 +1,5 @@
 namespace ensemble {
+    let hangingBuffer: number[] = []
     export interface MidiMessage {
         command: MidiCommand
         channel?: Channel
@@ -47,13 +48,30 @@ namespace ensemble {
     //% block="trigger MIDI event $buffer"
     //% group="MIDI"
     export function triggerMIDIEvents(buffer: Buffer) {
-        // Midi message has at least 3 bytes
-        // and is a multiple of 3 bytes
-        if (buffer.length > 2 && buffer.length % 3 === 0) {
-            for (let i = 0; i < buffer.length; i += 3) {
-                let command = buffer[i];
-                let note = buffer[i + 1];
-                let velocity = buffer[i + 2];
+        for (let i = 0; i < buffer.length; i++) {
+            let byte = buffer[i];
+
+            if ((byte >> 7) && 0x01 === 1) { // Status byte
+                
+                if (byte >> 4 === MidiCommand.NoteOn) { // Note on
+                    hangingBuffer = [byte];
+                } else if (byte >> 4 === MidiCommand.NoteOff) { // Note off
+                    hangingBuffer = [byte];
+                }
+                // else if (byte >> 4 === 0xF) { // System message
+                //     
+                // }   
+            }
+            else { // Data byte
+                if (hangingBuffer.length > 0) {
+                    hangingBuffer.push(byte);
+                }
+            }
+
+            if (hangingBuffer.length === 3) {
+                let command = hangingBuffer[0];
+                let note = hangingBuffer[1];
+                let velocity = hangingBuffer[2];
                 let commandType = command >> 4;
 
                 let clampedNote = Math.max(0, Math.min(note - lowestNoteForNoteDisplay, 24));
@@ -65,7 +83,12 @@ namespace ensemble {
                     globalNoteOffHandler(note, velocity);
                     activateNoteLed(clampedNote, velocity);
                 }
+
+                hangingBuffer = [];
+            } else if (hangingBuffer.length > 3) {
+                hangingBuffer = [];
             }
+
         }
     }
 }
