@@ -55,7 +55,7 @@ namespace ensemble {
         // Render note indicators
         for (let i = 0; i < 25; i++) {
             noteLeds[i].update();
-            led.plotBrightness(i % 4, Math.floor(i / 4), noteLeds[i].brightness);
+            led.plotBrightness(i % 5, Math.floor(i / 5), noteLeds[i].brightness);
         }
     }
 
