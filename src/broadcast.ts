@@ -67,32 +67,25 @@ namespace ensemble {
         for (let i = 0; i < buffer.length; i++) {
             let byte = buffer[i];
 
-            if (byte < 240) {                     // Midi command
-                if (dataCount > 0) {
-                    queueBroadcastMessage({
-                        group: cb * 16 + lastMIDIChannel,
-                        type: "data",
-                        byte
-                    });
-                    dataCount--;
-                } else {
-                    lastMIDICommand = (byte >> 4) & 0x0F;
+            if ((byte >> 7) && 0x01 === 1) {                     // Status byte
+                if (byte >> 4 === 0xF) { // System message
+                }
+                
+                else if (byte >> 4 === 0x8 || byte >> 4 === 0x9) { // Note off or on
                     lastMIDIChannel = byte & 0x0F;
                     queueBroadcastMessage({
-                        group: cb * 16 + lastMIDIChannel,
+                        group: cb * 16 + lastMIDIChannel + 1,
                         type: "note",
                         byte
                     });
-                    dataCount = 2;
-                } 
-
-            } else if (byte > 248) {             // System message
-                lastMIDICommand = byte;
-                lastMIDIChannel = Channel.System;
-                radio.setGroup(Channel.System);
-                radio.sendNumber(byte);
-            } else if (byte == 248) {     // Midi Clock
-                // ...
+                }
+            }
+            else {             // Data byte
+                queueBroadcastMessage({
+                    group: cb * 16 + lastMIDIChannel + 1,
+                    type: "data",
+                    byte
+                });
             }
         }
     }
