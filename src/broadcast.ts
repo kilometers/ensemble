@@ -22,6 +22,7 @@ namespace ensemble {
         while (count < broadcastQueueMaxCutoff && broadcastQueue.length > 0) {
             let message = broadcastQueue.shift();
             if (message.type == "note") {
+                if (broadcastQueue.length < 2) break;
                 const firstData = broadcastQueue.shift();
                 const secondData = broadcastQueue.shift();
                 if (firstData
@@ -38,7 +39,8 @@ namespace ensemble {
                     experimentalBuffersToSend[message.group].push(firstData.byte);
                     experimentalBuffersToSend[message.group].push(secondData.byte);
                 }
-            }
+            } else if (message.type == "data") {
+
             experimentalBuffersToSend.forEach((val, key) => {
                 if (experimentalBuffersToSend[key]) {
                     const bufferToSend = pins.createBufferFromArray(experimentalBuffersToSend[key]);
@@ -74,12 +76,13 @@ namespace ensemble {
 
             if ((byte >> 7) && 0x01 === 1) {                     // Status byte
                 if (byte >> 4 === 0xF) { // System message
+                    lastMIDIChannel = Channel.System;
                 }
                 
                 else if (byte >> 4 === 0x8 || byte >> 4 === 0x9) { // Note off or on
                     lastMIDIChannel = byte & 0x0F;
                     queueBroadcastMessage({
-                        group: cb * 16 + lastMIDIChannel + 1,
+                        group: cb * 16 + lastMIDIChannel,
                         type: "note",
                         byte
                     });
@@ -87,7 +90,7 @@ namespace ensemble {
             }
             else {             // Data byte
                 queueBroadcastMessage({
-                    group: cb * 16 + lastMIDIChannel + 1,
+                    group: cb * 16 + lastMIDIChannel,
                     type: "data",
                     byte
                 });
