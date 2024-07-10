@@ -13,7 +13,8 @@
         "custom.ts",
         "src/channel.ts",
         "src/midi.ts",
-        "src/display.ts"
+        "src/display.ts",
+        "src/broadcast.ts"
     ],
     "testFiles": [
         "test.ts"
