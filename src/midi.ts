@@ -16,6 +16,20 @@ namespace ensemble {
         NoteOff = 8
     }
 
+    export enum MicroMidiProtocol {
+        //% block="MIDI"
+        MIDI,
+        //% block="MICRO:MIDI"
+        // bit 7 is the note on / off flag (1 or 0)
+        // bits 6-4 are the channel (0-7)
+        // bits 3-0 are the note (0-15)
+        MICRO_MIDI,
+        //% block="micro:midi-jtn"
+        // bit 7 is the note on / off flag (1 or 0)
+        // bits 6-0 are the note (0-127)
+        // JTN
+    }
+
     let globalNoteOnHandler: (note: number, velocity: number) => void = (n: number, v: number) => { };
     let globalNoteOffHandler: (note: number, velocity: number) => void = (n: number, v: number) => { };
     
@@ -89,6 +103,45 @@ namespace ensemble {
                 hangingBuffer = [];
             }
 
+        }
+    }
+
+    /**
+     * Trigger simple events
+     * These are simplified, one byte messages with just a pitch and velocity
+     * The 4 MSB are pitch, the 4 LSB are velocity
+     */
+    //% block="trigger simple event $buffer"
+    //% group="MIDI"
+    export function triggerSimpleEvents(buffer: Buffer) {
+        for (let i = 0; i < buffer.length; i++) {
+            let byte = buffer[i];
+            let note = (byte >> 4) + 35;
+            let velocity = byte & 0x0F;
+            let clampedNote = Math.max(0, Math.min(note - lowestNoteForNoteDisplay, 24));
+
+            globalNoteOnHandler(note, velocity);
+            activateNoteLed(clampedNote, velocity);
+        }
+    }
+
+    export function handleMidiByte(
+        byte: uint8,
+        systemHandler: (byte: uint8) => void,
+        noteHandler: (byte: uint8) => void,
+        dataHandler: (byte: uint8) => void)
+    {
+        if ((byte >> 7) && 0x01 === 1) { // Status byte
+            if (byte >> 4 === 0xF) { // System message
+                systemHandler(byte);
+            }
+            
+            else if (byte >> 4 === 0x8 || byte >> 4 === 0x9) { // Note off or on
+                noteHandler(byte);
+            }
+        }
+        else { // Data byte
+            dataHandler(byte);
         }
     }
 }
