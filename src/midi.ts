@@ -17,17 +17,13 @@ namespace ensemble {
     }
 
     export enum MicroMidiProtocol {
-        //% block="MIDI"
-        MIDI,
         //% block="MICRO:MIDI"
         // bit 7 is the note on / off flag (1 or 0)
-        // bits 6-4 are the channel (0-7)
-        // bits 3-0 are the note (0-15)
+        // bits 6-3 are the note (0-15)
+        // bits 2-0 are the velocity (0-7)
         MICRO_MIDI,
-        //% block="micro:midi-jtn"
-        // bit 7 is the note on / off flag (1 or 0)
-        // bits 6-0 are the note (0-127)
-        // JTN
+        //% block="MIDI"
+        MIDI
     }
 
     let globalNoteOnHandler: (note: number, velocity: number) => void = (n: number, v: number) => { };
@@ -143,10 +139,10 @@ namespace ensemble {
     }
 
     export function handleMidiByte(
-        byte: uint8,
-        systemHandler: (byte: uint8) => void,
-        noteHandler: (byte: uint8) => void,
-        dataHandler: (byte: uint8) => void)
+        byte: number,
+        systemHandler: (byte: number) => void,
+        noteHandler: (byte: number) => void,
+        dataHandler: (byte: number) => void)
     {
         if ((byte >> 7) && 0x01 === 1) { // Status byte
             if (byte >> 4 === 0xF) { // System message
