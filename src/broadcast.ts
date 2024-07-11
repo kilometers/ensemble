@@ -6,6 +6,7 @@ namespace ensemble {
     export let lastMIDICommand: MidiCommand;
     export let dataCount = 0;
     const buffer = pins.createBuffer(3);
+    let hangingBuffer: number[] = [];
 
 
     
@@ -53,7 +54,7 @@ namespace ensemble {
      */
     //% block="broadcast MIDI $raw to $cb"
     //% group="MIDI"
-    export function broadcastMidiToBand(raw: string, cb: ChannelBand, protocol: MicroMidiProtocol = MicroMidiProtocol.C) {
+    export function broadcastMidiToBand(raw: string, cb: ChannelBand, protocol: MicroMidiProtocol = MicroMidiProtocol.MICRO_MIDI) {
         if (raw.length == 0) return;
         
         let buffer = Buffer.fromUTF8(raw);
@@ -101,6 +102,7 @@ namespace ensemble {
                             }
                         }
                     }
+                    // If we have a full message, process and send it
                     if (hangingBuffer.length === 3) {
                         const command = hangingBuffer[0] >> 4;
                         // Note flag lives in bit 7, can be on (1) or off (0)
@@ -131,39 +133,7 @@ namespace ensemble {
             }
         }
     }
-
-
-    let hangingBuffer: number[] = [];
-    /**
-     * Broadcast micro:midi events
-     * These are simplified, one byte messages
-     * bit 7 is the note on / off flag
-     * bits 5 and 4 are the channel
-     * bits 3 to 0 are the note
-     */
-    //% block="broadcast  event $buffer to $cb"
-    //% group="MIDI"
-    export function broadcastMicroMidiToBand(buffer: Buffer, cb: ChannelBand, protocol: MicroMidiProtocol = MicroMidiProtocol.MICRO_MIDI) {
-        for (let i = 0; i < buffer.length; i++) {
-            handleMidiByte(buffer[i], 
-                (byte) => { // System message
-                    // ...
-                }, 
-                (byte) => { // Note off or on
-                },
-                (byte) => { // Data byte
-                    if(hangingBuffer.length > 0) {
-                        hangingBuffer.push(byte);
-                    }
-                })
-            if (hangingBuffer.length === 3) {
-                
-            }
-            else if (hangingBuffer.length > 3) {
-                hangingBuffer = [];
-            }
-        }
-    }
+    
 
     /**
      * On radio received buffer

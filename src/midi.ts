@@ -59,48 +59,65 @@ namespace ensemble {
      * Trigger midi events based on input
      * input should be a buffer of midi messages (3 bytes each)
      */
-    //% block="trigger MIDI event $buffer"
+    //% block="trigger $protocol events from $buffer"
     //% group="MIDI"
-    export function triggerMIDIEvents(buffer: Buffer) {
+    export function triggerMIDIEvents(protocol: MicroMidiProtocol, buffer: Buffer) {
         for (let i = 0; i < buffer.length; i++) {
             let byte = buffer[i];
 
-            if ((byte >> 7) && 0x01 === 1) { // Status byte
-                
-                if (byte >> 4 === MidiCommand.NoteOn) { // Note on
-                    hangingBuffer = [byte];
-                } else if (byte >> 4 === MidiCommand.NoteOff) { // Note off
-                    hangingBuffer = [byte];
-                }
-                // else if (byte >> 4 === 0xF) { // System message
-                //     
-                // }   
-            }
-            else { // Data byte
-                if (hangingBuffer.length > 0) {
-                    hangingBuffer.push(byte);
-                }
-            }
+            switch(protocol) {
+                case MicroMidiProtocol.MIDI:
+                    handleMidiByte(byte, 
+                        (byte) => {
+                            // System message
+                        }, 
+                        (byte) => {
+                            // Note message
+                            hangingBuffer = [byte];
+                        },
+                        (byte) => {
+                            // Data message
+                            if(hangingBuffer.length > 0) {
+                                hangingBuffer.push(byte);
+                            }
+                        })
+                    
+                        // If we have a full message, process and trigger the handler
+                        if (hangingBuffer.length === 3) {
+                            let command = hangingBuffer[0];
+                            let note = hangingBuffer[1];
+                            let velocity = hangingBuffer[2];
+                            let commandType = command >> 4;
+            
+                            let clampedNote = Math.max(0, Math.min(note - lowestNoteForNoteDisplay, 24));
+            
+                            if (commandType === MidiCommand.NoteOn) {
+                                globalNoteOnHandler(note, velocity);
+                                activateNoteLed(clampedNote, velocity);
+                            } else if (commandType === MidiCommand.NoteOff) {
+                                globalNoteOffHandler(note, velocity);
+                                activateNoteLed(clampedNote, velocity);
+                            }
+            
+                            hangingBuffer = [];
+                        } else if (hangingBuffer.length > 3) {
+                            hangingBuffer = [];
+                        }
+                    break;
+                case MicroMidiProtocol.MICRO_MIDI:
+                    const noteFlag = byte >> 7;
+                    const note = byte >> 3 & 0x0F;
+                    const velocity = byte & 0x07;
 
-            if (hangingBuffer.length === 3) {
-                let command = hangingBuffer[0];
-                let note = hangingBuffer[1];
-                let velocity = hangingBuffer[2];
-                let commandType = command >> 4;
-
-                let clampedNote = Math.max(0, Math.min(note - lowestNoteForNoteDisplay, 24));
-
-                if (commandType === MidiCommand.NoteOn) {
-                    globalNoteOnHandler(note, velocity);
-                    activateNoteLed(clampedNote, velocity);
-                } else if (commandType === MidiCommand.NoteOff) {
-                    globalNoteOffHandler(note, velocity);
-                    activateNoteLed(clampedNote, velocity);
-                }
-
-                hangingBuffer = [];
-            } else if (hangingBuffer.length > 3) {
-                hangingBuffer = [];
+                    if (noteFlag === 1) {
+                        globalNoteOnHandler(note, velocity);
+                        activateNoteLed(note, velocity);
+                    }
+                    else {
+                        globalNoteOffHandler(note, velocity);
+                        activateNoteLed(note, velocity);
+                    }
+                    break;
             }
 
         }
