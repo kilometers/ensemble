@@ -37,6 +37,12 @@ class MicroMIDINote {
     }
 }
 
+enum Brightness {
+    Off = 0,
+    Low = 7,
+    High = 255
+}
+
 class Track {
     beats: MicroMIDINote[][] = []; // 16 notes
 
@@ -255,40 +261,49 @@ namespace ensemble {
         const row = Math.floor(selectedPitch / 4);
         const col = Math.floor(selectedBeat / 4);
 
-        basic.clearScreen();
-
         for (let i = 0; i < 4; i++) {
             for (let j = 0; j < 4; j++) {
                 const pitch = row * 4 + j;
                 const beat = col * 4 + i;
                 const note = patterns[selectedPattern].tracks[selectedTrack].beats[beat].find(note => note.pitch === pitch);
                 if (note && pitch === note.pitch) {
-                    led.plotBrightness(i, j, 255);
+                    led.plotBrightness(i, j, Brightness.High);
                 } else if(beat === selectedBeat || pitch === selectedPitch) {
-                    led.plotBrightness(i, j, 7);
+                    led.plotBrightness(i, j, Brightness.Low);
+                } else {
+                    led.unplot(i, j);
                 }
             }
         }
 
-        led.plotBrightness(4, row, 255); // Highlight the current vertical position (pitch)
-        led.plotBrightness(col, 4, 255); // Highlight the current horizontal position (beat)
+        for (let i = 0; i < 4; i++) {
+            if (row === i) {
+                led.plot(4, i);
+            } else {
+                led.unplot(4, i);
+            }
+
+            if (col === i) {
+                led.plot(i, 4);
+            } else {
+                led.unplot(i, 4);
+            }
+        }
     }
 
     function showPatternView() {
-        basic.clearScreen();
-
         // Display the pattern view
         // Any patterns with notes on are displayed with a brightness of 100
         // Empty patterns are displayed with a brightness of 0
         for (let i = 0; i < 16; i++) {
             if (patterns[selectedPattern].tracks[selectedTrack].beats.find(notes => notes.length > 0)) {
-                led.plotBrightness(i % 4, Math.floor(i / 4), 100);
+                led.plotBrightness(i % 4, Math.floor(i / 4), Brightness.Low);
             } else {
                 led.unplot(i % 4, Math.floor(i / 4));
             }
         }
 
-        led.plotBrightness(selectedPattern % 4, Math.floor(selectedPattern / 4), 255);
+        led.plotBrightness(selectedPattern % 4, Math.floor(selectedPattern / 4), Brightness.High);
     }
 
     function showTempoView() {
@@ -299,7 +314,7 @@ namespace ensemble {
         
         // Shuttle a dot back and forth on the fifth row in time with the tempo
         if (playing) {
-            const brightness = muted ? 100 : 255;
+            const brightness = muted ? Brightness.Low : Brightness.High;
             if (currentBeat < 8) {
                 // Dot moves to the right
                 led.plotBrightness(Math.floor(currentBeat / 2), 4, brightness);
