@@ -13,10 +13,11 @@
  * - logo: play/pause the sequencer
  * 
  * Track View Controls
- * - A: toggle beat on/off
+ * - A: move to previous beat
  * - B: move to next beat
  * - tilt up/down: move to a higher/lower pitch
- * - A+B: move to next track (MIDI-channel)
+ * - A+B + tilt: move to different track (MIDI-channel)
+ * - 0, 1, 2 connectors: toggle note on/off
  * 
  * Pattern View Controls
  * - A: move to previous pattern
@@ -115,7 +116,7 @@ namespace ensemble {
         // Initialize the sequencer
         input.onButtonPressed(Button.A, function () {
             if (view === SequencerView.Track) {
-                toggleNote();
+                previousBeat();
             } else if (view === SequencerView.Pattern) {
                 previousPattern();
             } else if (view === SequencerView.Tempo) {
@@ -135,13 +136,13 @@ namespace ensemble {
 
         input.onButtonPressed(Button.AB, function () {
             if (view === SequencerView.Track) {
-                nextTrack();
+                // ?
             } else if (view === SequencerView.Tempo) {
                 toggleMute();
             }
         });
 
-        // Toggle between track and pattern view
+        // Toggle between track, pattern and tempo view
         input.onShake(function () {
             if (view === SequencerView.Track) {
                 view = SequencerView.Pattern;
@@ -158,17 +159,41 @@ namespace ensemble {
 
         // Move to a higher pitch
         input.onLogoUp(function () {
-            selectedPitch += 1;
-            if (selectedPitch > 15) { // cycle back to 0
-                selectedPitch = 0;
+            if (view === SequencerView.Track) {
+                if (input.buttonIsPressed(Button.AB)) { 
+                    selectedTrack -= 1;
+                    if (selectedTrack < 0) { // cycle back to 15
+                        selectedTrack = 15;
+                    }
+                } else {
+                    selectedPitch -= 1;
+                    if (selectedPitch < 0) { // cycle back to 15
+                        selectedPitch = 15;
+                    }
+                }
             }
         });
             
         // Move to a lower pitch
         input.onLogoDown(function () {
-            selectedPitch -= 1;
-            if (selectedPitch < 0) { // cycle back to 15
-                selectedPitch = 15;
+            if (view === SequencerView.Track) {
+                if (input.buttonIsPressed(Button.AB)) { 
+                    selectedTrack += 1;
+                    if (selectedTrack > 15) { // cycle back to 0
+                        selectedTrack = 0;
+                    }
+                } else {
+                    selectedPitch += 1;
+                    if (selectedPitch > 15) { // cycle back to 0
+                        selectedPitch = 0;
+                    }
+                }
+            }
+        });
+
+        input.onPinPressed(TouchPin.P0, function () { 
+            if(view === SequencerView.Track) {
+                toggleNote();
             }
         });
 
@@ -202,6 +227,14 @@ namespace ensemble {
         // Toggle the current beat on or off
         patterns[selectedPattern].tracks[selectedTrack].toggleNote(selectedBeat, selectedPitch);
 
+    }
+
+    function previousBeat() {
+        // Move to the previous beat
+        selectedBeat = (selectedBeat - 1) % 16;
+        if (selectedBeat < 0) {
+            selectedBeat = 15;
+        }
     }
 
     function nextBeat() {
@@ -272,7 +305,7 @@ namespace ensemble {
                 if (note && pitch === note.pitch) {
                     led.plotBrightness(i, j, Brightness.High);
                 } else if (beat === selectedBeat || pitch === selectedPitch) {
-                    led.plotBrightness(i, j, Brightness.Low);
+                    led.plotBrightness(i, j, Brightness.Low + Math.sin(input.runningTime() / 100) * 20);
                 } else if (beat === currentBeat) {
                     led.plotBrightness(i, j, Math.floor(Brightness.Low / 2));
                 }
