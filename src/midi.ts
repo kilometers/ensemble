@@ -26,8 +26,8 @@ namespace ensemble {
         MIDI
     }
 
-    let globalNoteOnHandler: (note: number, velocity: number) => void = (n: number, v: number) => { };
-    let globalNoteOffHandler: (note: number, velocity: number) => void = (n: number, v: number) => { };
+    export let globalNoteOnHandler: (note: number, velocity: number) => void = (n: number, v: number) => { };
+    export let globalNoteOffHandler: (note: number, velocity: number) => void = (n: number, v: number) => { };
     
     /**
      * Triggers for any 'Note On' MIDI message 
