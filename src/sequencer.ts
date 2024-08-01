@@ -296,7 +296,7 @@ namespace ensemble {
         // Any patterns with notes on are displayed with a brightness of 100
         // Empty patterns are displayed with a brightness of 0
         for (let i = 0; i < 16; i++) {
-            if (patterns[selectedPattern].tracks[selectedTrack].beats.find(notes => notes.length > 0)) {
+            if (patterns[i].tracks[selectedTrack].beats.find(notes => notes.length > 0)) {
                 led.plotBrightness(i % 4, Math.floor(i / 4), Brightness.Low);
             } else {
                 led.unplot(i % 4, Math.floor(i / 4));
@@ -307,21 +307,25 @@ namespace ensemble {
     }
 
     function showTempoView() {
-        basic.clearScreen();
-        for(let i = 0; i < (tempo - 20) / 10; i++) {
-            led.plot(i % 5, Math.floor(i / 5));
-        }
-        
-        // Shuttle a dot back and forth on the fifth row in time with the tempo
-        if (playing) {
-            const brightness = muted ? Brightness.Low : Brightness.High;
-            if (currentBeat < 8) {
-                // Dot moves to the right
-                led.plotBrightness(Math.floor(currentBeat / 2), 4, brightness);
-            } else {
-                // Dot moves to the left
-                led.plotBrightness(3 - Math.floor((currentBeat - 8) / 2), 4, brightness);
+        for (let i = 0; i < (tempo - 20) / 10; i++) {
+            if (i < (tempo - 20) / 10) {
+                led.plotBrightness(i % 5, Math.floor(i / 5), Brightness.High);
+            }
+            else {
+                led.unplot(i % 5, Math.floor(i / 5));
             }
         }
+        
+        // // Shuttle a dot back and forth on the fifth row in time with the tempo
+        // if (playing) {
+        //     const brightness = muted ? Brightness.Low : Brightness.High;
+        //     if (currentBeat < 8) {
+        //         // Dot moves to the right
+        //         led.plotBrightness(Math.floor(currentBeat / 2), 4, brightness);
+        //     } else {
+        //         // Dot moves to the left
+        //         led.plotBrightness(3 - Math.floor((currentBeat - 8) / 2), 4, brightness);
+        //     }
+        // }
     }
 }
