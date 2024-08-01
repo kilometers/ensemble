@@ -101,7 +101,7 @@ namespace ensemble {
     let patterns: Pattern[] = [];
 
     // Track view variables
-    let selectedPitch = 0;
+    let selectedPitch = 15;
 
     /**
      * Initialize the sequencer controls and loop
@@ -200,7 +200,7 @@ namespace ensemble {
         });
 
         basic.forever(function () {
-            if (playing && lastBeatTime + 60000 / tempo < input.runningTime()) {
+            if (playing && lastBeatTime + 30000 / tempo < input.runningTime()) {
                 currentBeat = (currentBeat + 1) % 16;
                 // Play the notes from each track in the selected pattern
                 for (let i = 0; i < 16; i++) {
