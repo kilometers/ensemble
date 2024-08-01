@@ -271,9 +271,12 @@ namespace ensemble {
                 const note = patterns[selectedPattern].tracks[selectedTrack].beats[beat].find(note => note.pitch === pitch);
                 if (note && pitch === note.pitch) {
                     led.plotBrightness(i, j, Brightness.High);
-                } else if(beat === selectedBeat || pitch === selectedPitch) {
+                } else if (beat === selectedBeat || pitch === selectedPitch) {
                     led.plotBrightness(i, j, Brightness.Low);
-                } else {
+                } else if (beat === currentBeat) {
+                    led.plotBrightness(i, j, Math.floor(Brightness.Low / 2));
+                }
+                else {
                     led.unplot(i, j);
                 }
             }
