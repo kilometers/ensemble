@@ -97,6 +97,16 @@ namespace ensemble {
         }
     }
 
+    /**
+     * Pulse a pin on the Microbit
+     * Useful for triggering solenoids
+     */
+    //% block="pulse pin $pin"
+    //% group="MIDI"
+    export function pulsePin(pin: DigitalPin) {
+        
+    }
+
     basic.forever(() => {
         broadcastMessages();
     });
