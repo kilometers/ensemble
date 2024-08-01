@@ -113,7 +113,7 @@ namespace ensemble {
             patterns.push(new Pattern());
         }
 
-        pins.touchSetMode(TouchTarget.P0, TouchTargetMode.Capacitive);
+        pins.touchSetMode(TouchTarget.P2, TouchTargetMode.Capacitive);
 
         // Initialize the sequencer
         input.onButtonPressed(Button.A, function () {
@@ -193,7 +193,7 @@ namespace ensemble {
             }
         });
 
-        input.onPinPressed(TouchPin.P0, function () { 
+        input.onPinPressed(TouchPin.P2, function () { 
             if(view === SequencerView.Track) {
                 toggleNote();
             }
