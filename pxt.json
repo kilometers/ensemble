@@ -15,7 +15,8 @@
         "src/midi.ts",
         "src/display.ts",
         "src/broadcast.ts",
-        "src/sequencer.ts"
+        "src/sequencer.ts",
+        "src/pulse.ts"
     ],
     "testFiles": [
         "test.ts"

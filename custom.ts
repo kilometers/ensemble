@@ -97,16 +97,6 @@ namespace ensemble {
         }
     }
 
-    /**
-     * Pulse a pin on the Microbit
-     * Useful for triggering solenoids
-     */
-    //% block="pulse pin $pin"
-    //% group="MIDI"
-    export function pulsePin(pin: DigitalPin) {
-        
-    }
-
     basic.forever(() => {
         broadcastMessages();
     });
@@ -118,16 +108,3 @@ enum STATE {
     ERROR
 }
 let state: STATE = STATE.IDLE;
-
-
-class Pulse {
-    pin: DigitalPin
-    start: number
-    duration: number
-
-    constructor(pin: DigitalPin, duration?: number) {
-        this.pin = pin;
-        this.start = input.runningTime();
-        this.duration = duration | 40;
-    }
-}
