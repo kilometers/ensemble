@@ -9,7 +9,7 @@
  *   ensemble's conductor can change the tempo and mute/unmute musicians.
  * 
  * General Controls
- * - shake: toggle between track and pattern view
+ * - shake: toggle between track, pattern and tempo views
  * - logo: play/pause the sequencer
  * 
  * Track View Controls
@@ -92,8 +92,9 @@ namespace ensemble {
     let selectedPitch = 0;
 
     /**
-     * Initialize the sequencer controls
+     * Initialize the sequencer controls and loop
      */
+    //% block="initialize sequencer for band $cb"
     export function initSequencer(cb: ChannelBand) {
         // Initialize the patterns
         for (let i = 0; i < 16; i++) {
@@ -224,9 +225,11 @@ namespace ensemble {
         muted = !muted;
     }
 
-    // Display the sequencer
+    /**
+     * Show the sequencer display
+     */
     //% block="show sequencer"
-    function showSequencer() {
+    export function showSequencer() {
         if (view === SequencerView.Track) {
             // Display the track view
             showTrackView();
