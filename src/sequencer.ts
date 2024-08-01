@@ -113,6 +113,8 @@ namespace ensemble {
             patterns.push(new Pattern());
         }
 
+        pins.touchSetMode(TouchTarget.P0, TouchTargetMode.Capacitive);
+
         // Initialize the sequencer
         input.onButtonPressed(Button.A, function () {
             if (view === SequencerView.Track) {
