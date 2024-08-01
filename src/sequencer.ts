@@ -31,7 +31,10 @@
 class MicroMIDINote {
     velocity: number = 0; // 0-7
     pitch: number = 0; // 0-15
-    on: boolean = false; // on or off
+
+    constructor() {
+        // Gotta make Makecode happy
+    }
 }
 
 class Track {
@@ -256,8 +259,8 @@ namespace ensemble {
                 const note = patterns[selectedPattern].tracks[selectedTrack].beats[beat][pitch];
                 if (note && pitch === note.pitch) {
                     led.plotBrightness(i, j, 255);
-                } else if(beat === selectedBeat) {
-                    led.plotBrightness(i, j, 100);
+                } else if(beat === selectedBeat || pitch === selectedPitch) {
+                    led.plotBrightness(i, j, 7);
                 }
             }
         }
