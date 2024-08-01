@@ -213,7 +213,7 @@ namespace ensemble {
                                 // bit 7 is the note on / off flag (1 or 0)
                                 // bits 6-3 are the note (0-15)
                                 // bits 2-0 are the velocity (0-7)
-                                byte: ((1 << 7) & 0x80) | ((selectedPitch << 3) & 0x78) | (7 & 0x07)
+                                byte: ((1 << 7) & 0x80) | ((note.pitch << 3) & 0x78) | (note.velocity & 0x07)
                             });
                         }
                     }
