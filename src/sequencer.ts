@@ -137,7 +137,9 @@ namespace ensemble {
         input.onShake(function () {
             if (view === SequencerView.Track) {
                 view = SequencerView.Pattern;
-            } else {
+            } else if (view === SequencerView.Pattern) {
+                view = SequencerView.Tempo;
+            } else if (view === SequencerView.Tempo) {
                 view = SequencerView.Track;
             }
         });
