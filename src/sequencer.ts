@@ -48,15 +48,17 @@ class Track {
     }
 
     toggleNote(beat: number, pitch: number) {
-        if (beat < 0 || beat > 15) {
+        if (beat >= 0 || beat <= 15) {
             // Toggle the note on or off
-            if (this.beats[beat][pitch]) {
-                this.beats[beat][pitch] = null;
+            const note = this.beats[beat].find(note => note.pitch === pitch)
+            if (note) {
+                this.beats[beat] = this.beats[beat].filter(n => n.pitch !== note.pitch);
             }
             else {
-                this.beats[beat][pitch] = new MicroMIDINote();
-                this.beats[beat][pitch].pitch = pitch;
-                this.beats[beat][pitch].velocity = 7;
+                const newNote = new MicroMIDINote();
+                newNote.pitch = pitch;
+                newNote.velocity = 7;
+                this.beats[beat].push(newNote);
             }
         }
     }
@@ -193,6 +195,7 @@ namespace ensemble {
     function toggleNote() {
         // Toggle the current beat on or off
         patterns[selectedPattern].tracks[selectedTrack].toggleNote(selectedBeat, selectedPitch);
+
     }
 
     function nextBeat() {
@@ -258,7 +261,7 @@ namespace ensemble {
             for (let j = 0; j < 4; j++) {
                 const pitch = row * 4 + j;
                 const beat = col * 4 + i;
-                const note = patterns[selectedPattern].tracks[selectedTrack].beats[beat][pitch];
+                const note = patterns[selectedPattern].tracks[selectedTrack].beats[beat].find(note => note.pitch === pitch);
                 if (note && pitch === note.pitch) {
                     led.plotBrightness(i, j, 255);
                 } else if(beat === selectedBeat || pitch === selectedPitch) {
@@ -280,6 +283,8 @@ namespace ensemble {
         for (let i = 0; i < 16; i++) {
             if (patterns[selectedPattern].tracks[selectedTrack].beats.find(notes => notes.length > 0)) {
                 led.plotBrightness(i % 4, Math.floor(i / 4), 100);
+            } else {
+                led.unplot(i % 4, Math.floor(i / 4));
             }
         }
 
