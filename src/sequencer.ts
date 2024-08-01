@@ -166,9 +166,9 @@ namespace ensemble {
                         selectedTrack = 15;
                     }
                 } else {
-                    selectedPitch -= 1;
-                    if (selectedPitch < 0) { // cycle back to 15
-                        selectedPitch = 15;
+                    selectedPitch += 1;
+                    if (selectedPitch > 15) { // cycle back to 0
+                        selectedPitch = 0;
                     }
                 }
             }
@@ -183,9 +183,9 @@ namespace ensemble {
                         selectedTrack = 0;
                     }
                 } else {
-                    selectedPitch += 1;
-                    if (selectedPitch > 15) { // cycle back to 0
-                        selectedPitch = 0;
+                    selectedPitch -= 1;
+                    if (selectedPitch < 0) { // cycle back to 15
+                        selectedPitch = 15;
                     }
                 }
             }
@@ -240,6 +240,14 @@ namespace ensemble {
     function nextBeat() {
         // Move to the next beat
         selectedBeat = (selectedBeat + 1) % 16;
+    }
+
+    function previousTrack() {
+        // Move to the previous track
+        selectedTrack = (selectedTrack - 1) % 16;
+        if (selectedTrack < 0) {
+            selectedTrack = 15;
+        }
     }
 
     function nextTrack() {
