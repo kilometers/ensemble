@@ -305,7 +305,7 @@ namespace ensemble {
                 if (note && pitch === note.pitch) {
                     led.plotBrightness(i, j, Brightness.High);
                 } else if (beat === selectedBeat || pitch === selectedPitch) {
-                    led.plotBrightness(i, j, Brightness.Low + Math.sin(input.runningTime() / 100) * 20);
+                    led.plotBrightness(i, j, Brightness.Low + Math.sin(input.runningTime() / 100) * 10 + 10);
                 } else if (beat === currentBeat) {
                     led.plotBrightness(i, j, Math.floor(Brightness.Low / 2));
                 }
