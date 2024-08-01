@@ -217,6 +217,9 @@ namespace ensemble {
     function previousPattern() {
         // Move to the previous pattern
         selectedPattern = (selectedPattern - 1) % 16;
+        if (selectedPattern < 0) {
+            selectedPattern = 15;
+        }
     }
 
     function nextPattern() {
