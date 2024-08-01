@@ -299,14 +299,21 @@ namespace ensemble {
         // Any patterns with notes on are displayed with a brightness of 100
         // Empty patterns are displayed with a brightness of 0
         for (let i = 0; i < 16; i++) {
-            if (patterns[i].tracks[selectedTrack].beats.find(notes => notes.length > 0)) {
+            if (selectedPattern === i) {
+                led.plotBrightness(i % 4, Math.floor(i / 4), Brightness.High);
+            }
+            else if (patterns[i].tracks[selectedTrack].beats.find(notes => notes.length > 0)) {
                 led.plotBrightness(i % 4, Math.floor(i / 4), Brightness.Low);
             } else {
                 led.unplot(i % 4, Math.floor(i / 4));
             }
         }
 
-        led.plotBrightness(selectedPattern % 4, Math.floor(selectedPattern / 4), Brightness.High);
+        // clear far right column and bottom row
+        for (let i = 0; i < 5; i++) {
+            led.unplot(4, i);
+            led.unplot(i, 4);
+        }
     }
 
     function showTempoView() {
