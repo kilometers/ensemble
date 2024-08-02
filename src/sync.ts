@@ -5,7 +5,7 @@
 
 namespace ensemble {
  
-    enum PulseValue {
+    export enum PulseValue {
         WHOLE = 1,
         HALF = 2,
         QUARTER = 4,
