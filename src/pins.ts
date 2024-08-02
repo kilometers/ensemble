@@ -28,7 +28,7 @@ namespace ensemble {
     /*
      * Analog write pin with linear interpolation
      */
-    //% block="analog write pin $pin from $value to $value over $duration ms"
+    //% block="analog write pin $pin from $from to $to over $duration ms"
     //% duration.defl=100
     //% group="Pins"
     export function analogWritePinLinear(pin: AnalogPin, from: number, to: number, duration: number) {
