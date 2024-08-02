@@ -228,7 +228,6 @@ namespace ensemble {
     function toggleNote() {
         // Toggle the current beat on or off
         patterns[selectedPattern].tracks[selectedTrack].toggleNote(selectedBeat, selectedPitch);
-
     }
 
     function previousBeat() {
@@ -236,7 +235,7 @@ namespace ensemble {
         selectedBeat = (selectedBeat - 1) % 16;
         if (selectedBeat < 0) {
             selectedBeat = 15;
-        }
+        }   
     }
 
     function nextBeat() {
