@@ -57,7 +57,7 @@ namespace ensemble {
      */
     //% block="set pulse to $pulse"
     //% group="Sync"
-    //% pulse.defl=8
+    //% pulse.defl=PulseValue.EIGHTH
     export function setPulseValue(pulse: PulseValue) {
         pulseValue = pulse;
     }
