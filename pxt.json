@@ -16,7 +16,8 @@
         "src/display.ts",
         "src/broadcast.ts",
         "src/sequencer.ts",
-        "src/pulse.ts"
+        "src/pins.ts",
+        "src/sync.ts"
     ],
     "testFiles": [
         "test.ts"
