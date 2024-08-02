@@ -31,7 +31,7 @@ namespace ensemble {
     /*
      * Set the tempo
      */
-    //% block="set tempo to $tempo BPM"
+    //% block="set tempo to $t BPM"
     //% group="Sync"
     export function setTempo(t: number) {
         tempo = t;
