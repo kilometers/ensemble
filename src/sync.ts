@@ -32,6 +32,7 @@ namespace ensemble {
      * Set the tempo
      */
     //% block="set tempo to $t BPM"
+    //% t.defl=120 t.min=20 t.max=999
     //% group="Sync"
     export function setTempo(t: number) {
         tempo = t;
