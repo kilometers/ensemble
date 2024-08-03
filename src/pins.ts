@@ -63,6 +63,9 @@ namespace ensemble {
     //% group="Pins"
     //% color="#b82424"
     export function digitalWritePinSequence(pin: DigitalPin, beat: number, sequence: number[]) {
+        if (sequence.length === 0 || sequence[beat % sequence.length] === 0) {
+            return;
+        }
         pins.digitalWritePin(pin, 1);
         delayedDigitalWritePin(pin, 0, sequence[beat % sequence.length]);
     }
