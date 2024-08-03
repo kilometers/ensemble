@@ -5,7 +5,7 @@
 
 namespace ensemble {
  
-    export enum PulseValue {
+    export enum BeatValue {
         WHOLE = 1,
         HALF = 2,
         QUARTER = 4,
@@ -13,19 +13,19 @@ namespace ensemble {
         SIXTEENTH = 16
     }
 
-    export let pulseHandler: (pulse: number, pulseLength: number) => void = (pulse: number, pulseLength: number) => { };
-    export let pulse = 0;
-    export let pulseValue = PulseValue.EIGHTH;
+    export let beatHandler: (beat: number, beatLength: number) => void = (beat: number, beatLength: number) => { };
+    export let beat = 0;
+    export let beatValue = BeatValue.EIGHTH;
     export let tempo = 120;
 
     /*
-     * On pulse callback
+     * On beat callback
      */
-    //% block="on pulse $pulse $pulseLength"
+    //% block="on beat $beat $beatLength"
     //% draggableParameters="reporter"
     //% group="Sync"
-    export function onPulse(handler: (pulse: number, pulseLength: number) => void) {
-        pulseHandler = (pulse: number, pulseLength: number) => handler(pulse, pulseLength);
+    export function onBeat(handler: (beat: number, beatLength: number) => void) {
+        beatHandler = (beat: number, beatLength: number) => handler(beat, beatLength);
     }
 
     /*
@@ -45,20 +45,20 @@ namespace ensemble {
     export function startInternalMetronome() {
         control.inBackground(() => {
             while (true) {
-                pulseHandler(pulse, (240000 / pulseValue) / tempo);
-                pulse = pulse + 1 % 16;
-                basic.pause((240000 / pulseValue) / tempo);
+                beatHandler(beat + 1, (240000 / beatValue) / tempo);
+                beat = (beat + 1) % 16;
+                basic.pause((240000 / beatValue) / tempo);
             }
         });
     }
 
     /*
-     * Set pulse value
+     * Set beat value
      */
-    //% block="set pulse to $pulse"
+    //% block="set beat to $beat"
     //% group="Sync"
-    //% pulse.defl=PulseValue.EIGHTH
-    export function setPulseValue(pulse: PulseValue) {
-        pulseValue = pulse;
+    //% beat.defl=BeatValue.EIGHTH
+    export function setBeatValue(beat: BeatValue) {
+        beatValue = beat;
     }
 }
