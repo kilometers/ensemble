@@ -45,8 +45,8 @@ namespace ensemble {
     export function startInternalMetronome() {
         control.inBackground(() => {
             while (true) {
-                beatHandler(beat + 1, (240000 / beatValue) / tempo);
-                beat = (beat) % 16;
+                beatHandler(beat, (240000 / beatValue) / tempo);
+                beat = (beat + 1) % 16;
                 basic.pause((240000 / beatValue) / tempo);
             }
         });
@@ -55,10 +55,10 @@ namespace ensemble {
     /*
      * Set beat value
      */
-    //% block="set beat to $beat"
+    //% block="set beat to $value"
     //% group="Sync"
     //% beat.defl=BeatValue.EIGHTH
-    export function setBeatValue(beat: BeatValue) {
-        beatValue = beat;
+    export function setBeatValue(value: BeatValue) {
+        beatValue = value;
     }
 }
