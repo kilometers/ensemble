@@ -56,4 +56,14 @@ namespace ensemble {
     }
 
 
+    /*
+     * Digital write pin on beat sequence
+     */
+    //% block="digital write pin $pin on beat $beat sequence $sequence"
+    //% group="Pins"
+    //% color="#b82424"
+    export function digitalWritePinSequence(pin: DigitalPin, beat: number, sequence: number[]) {
+        pins.digitalWritePin(pin, 1);
+        delayedDigitalWritePin(pin, 0, sequence[beat % sequence.length]);
+    }
 }

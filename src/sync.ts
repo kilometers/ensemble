@@ -46,7 +46,7 @@ namespace ensemble {
         control.inBackground(() => {
             while (true) {
                 beatHandler(beat + 1, (240000 / beatValue) / tempo);
-                beat = (beat + 1) % 16;
+                beat = (beat) % 16;
                 basic.pause((240000 / beatValue) / tempo);
             }
         });
