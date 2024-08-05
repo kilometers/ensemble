@@ -57,7 +57,7 @@ namespace ensemble {
     /*
      * Start the internal metronome
      */
-    //% block="start internal metronome || repeating every $count beats"
+    //% block="start internal metronome || repeating every $c beats"
     //% count.defl=4 count.min=2
     //% expandableArgumentMode="toggle"
     //% group="Sync"
