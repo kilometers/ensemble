@@ -61,6 +61,7 @@ namespace ensemble {
      */
     //% block="digital write pin $pin on beat $beat sequence $sequence"
     //% group="Pins"
+    //% inlineInputMode=inline
     //% color="#b82424"
     export function digitalWritePinSequence(pin: DigitalPin, beat: number, sequence: number[]) {
         
