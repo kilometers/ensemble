@@ -29,6 +29,9 @@ namespace ensemble {
     export let beatValue = BeatValue.EIGHTH;
     export let tempo = 120;
     let externalBeatHistory: BeatRecord[] = [];
+    let externalBeatLength = (240000 / beatValue) / tempo;
+
+    basic.pause(((240000 / beatValue) / tempo));;
     let useExternalBeat = false;
     let internalMetronomeStarted = false;
     /*
@@ -58,30 +61,37 @@ namespace ensemble {
     //% count.defl=4 count.min=2
     //% expandableArgumentMode="toggle"
     //% group="Sync"
-    export function startInternalMetronome(count: number) {
+    export function startInternalMetronome(c?: number) {
         if (internalMetronomeStarted) {
             return;
         }
-        let activeCount = count ? count : 4;
+        let count = c ? c : 4;
         control.inBackground(() => {
             while (true) {
-                if (!useExternalBeat) {
-                    beatHandler(beat, (240000 / beatValue) / tempo);
-                    beat = (beat + 1) % activeCount;
-
-                    basic.pause(((240000 / beatValue) / tempo));
-                } else {
+                if (useExternalBeat && externalBeatHistory.length > 1) {
                     const prediction = predictNextBeat();
                     if (prediction) {
-                        let thisBeat = prediction.nextBeat - 1;
+                        let thisBeat = (prediction.nextBeat - 1);
                         if(thisBeat < 0) {
-                            thisBeat = activeCount - 1;
+                            thisBeat = count - 1;
                         }
+                        thisBeat = thisBeat % count;
                         beatHandler(thisBeat, prediction.averageBeatLength);
+                        beat = (thisBeat + 1) % count;
                         basic.pause(prediction.timeToNextBeat);
                     } else {
                         basic.pause(1);
                     }
+                } else if (useExternalBeat) {
+                    beatHandler(beat, externalBeatLength);
+                    beat = (beat + 1) % count;
+
+                    basic.pause(externalBeatLength);
+                } else {
+                    beatHandler(beat, (240000 / beatValue) / tempo);
+                    beat = (beat + 1) % count;
+
+                    basic.pause(((240000 / beatValue) / tempo));
                 }
             }
         });
@@ -118,7 +128,7 @@ namespace ensemble {
      */
     function predictNextBeat(): BeatPrediction {
         if (externalBeatHistory.length < 2) {
-            return;
+            return null;
         }
 
         let historyTotal = 0;
