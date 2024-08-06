@@ -42,7 +42,7 @@ namespace ensemble {
     /*
      * On beat callback
      */
-    //% block="on beat $beat $beatLength"
+    //% block="on beat $beat $bar $beatLength"
     //% draggableParameters="reporter"
     //% group="Sync"
     export function onBeat(handler: (beat: number, bar :number, beatLength: number) => void) {
