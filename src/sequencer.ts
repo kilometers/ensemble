@@ -107,6 +107,7 @@ namespace ensemble {
      * Initialize the sequencer controls and loop
      */
     //% block="initialize sequencer for band $cb"
+    //% advanced=true
     export function initSequencer(cb: ChannelBand) {
         // Initialize the patterns
         for (let i = 0; i < 16; i++) {
@@ -288,6 +289,7 @@ namespace ensemble {
      * Show the sequencer display
      */
     //% block="show sequencer"
+    //% advanced=true
     export function showSequencer() {
         if (view === SequencerView.Track) {
             // Display the track view

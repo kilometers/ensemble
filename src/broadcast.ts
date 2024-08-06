@@ -54,6 +54,7 @@ namespace ensemble {
      */
     //% block="broadcast MIDI $raw to $cb"
     //% group="MIDI"
+    //% advanced=true
     export function broadcastMidiToBand(raw: string, cb: ChannelBand, protocol: MicroMidiProtocol = MicroMidiProtocol.MICRO_MIDI) {
         if (raw.length == 0) return;
         
@@ -142,6 +143,7 @@ namespace ensemble {
     //% color="#E3008C"
     //% draggableParameters="reporter"
     //% group="MIDI"
+    //% advanced=true
     export function onRadioReceivedBuffer(handler: (receivedBuffer: Buffer) => void): void {
         radio.onReceivedBuffer(handler);
     }

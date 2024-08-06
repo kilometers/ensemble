@@ -23,6 +23,7 @@ namespace ensemble {
      */
     //% block="initialize serial for MIDI"
     //% group="MIDI"
+    //% advanced=true
     export function initSerialForMidi(): void {
         serial.setTxBufferSize(64)
         serial.setRxBufferSize(64)
