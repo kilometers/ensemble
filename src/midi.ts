@@ -35,6 +35,7 @@ namespace ensemble {
     //% block="on MIDI message 'note on' | $note $velocity"
     //% draggableParameters="reporter"
     //% group="MIDI"
+    //% advanced=true
     export function onAnyNoteOn(handler: (note: number, velocity: number) => void): void {
         globalNoteOnHandler = (n: number, v: number) => handler(n, v);
     }
@@ -45,6 +46,7 @@ namespace ensemble {
     //% block="on MIDI message 'note off' | $note $velocity"
     //% draggableParameters="reporter"
     //% group="MIDI"
+    //% advanced=true
     export function onAnyNoteOff(handler: (note: number, velocity: number) => void): void {
         globalNoteOffHandler = (n: number, v: number) => handler(n, v);
     }
@@ -57,6 +59,7 @@ namespace ensemble {
      */
     //% block="trigger $protocol events from $buffer"
     //% group="MIDI"
+    //% advanced=true
     export function triggerMIDIEvents(protocol: MicroMidiProtocol, buffer: Buffer) {
         for (let i = 0; i < buffer.length; i++) {
             let byte = buffer[i];
@@ -126,6 +129,7 @@ namespace ensemble {
      */
     //% block="trigger simple event $buffer"
     //% group="MIDI"
+    //% advanced=true
     export function triggerSimpleEvents(buffer: Buffer) {
         for (let i = 0; i < buffer.length; i++) {
             let byte = buffer[i];
