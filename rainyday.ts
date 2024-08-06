@@ -117,3 +117,43 @@
 //         hangingBuffer = [];
 //     }
 // }
+
+
+
+
+// export function startInternalMetronome(c?: number) {
+//     if (internalMetronomeStarted) {
+//         return;
+//     }
+//     let count = c && c > 1 ? c : 4;
+//     control.inBackground(() => {
+//         while (true) {
+//             if (useExternalBeat && externalBeatHistory.length > 1) {
+//                 const prediction = predictNextBeat();
+//                 if (prediction) {
+//                     let thisBeat = (prediction.nextBeat - 1);
+//                     if(thisBeat < 0) {
+//                         thisBeat = count - 1;
+//                     }
+//                     thisBeat = thisBeat % count;
+//                     beatHandler(thisBeat, prediction.averageBeatLength);
+//                     beat = (thisBeat + 1) % count;
+//                     basic.pause(prediction.timeToNextBeat);
+//                 } else {
+//                     basic.pause(1);
+//                 }
+//             } else if (useExternalBeat) {
+//                 beatHandler(beat, externalBeatLength);
+//                 beat = (beat + 1) % count;
+
+//                 basic.pause(externalBeatLength);
+//             } else {
+//                 beatHandler(beat, (240000 / beatValue) / tempo);
+//                 beat = (beat + 1) % count;
+
+//                 basic.pause(((240000 / beatValue) / tempo));
+//             }
+//         }
+//     });
+//     internalMetronomeStarted = true;
+// }
