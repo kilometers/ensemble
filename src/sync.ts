@@ -72,7 +72,7 @@ namespace ensemble {
     /*
      * Start the internal metronome
      */
-    //% block="start internal metronome
+    //% block="start internal metronome"
     //% c.defl=4 c.min=2
     //% group="Sync"
     export function startInternalMetronome() {
