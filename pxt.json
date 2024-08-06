@@ -12,12 +12,11 @@
         "README.md",
         "custom.ts",
         "src/channel.ts",
-        "src/midi.ts",
-        "src/display.ts",
-        "src/broadcast.ts",
-        "src/sequencer.ts",
+        "src/sync.ts",
         "src/pins.ts",
-        "src/sync.ts"
+        "src/midi.ts",
+        "src/broadcast.ts",
+        "src/sequencer.ts"
     ],
     "testFiles": [
         "test.ts"
