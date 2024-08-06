@@ -8,7 +8,7 @@ enum EnsembleMember {
  * Ensemble action
  */
 //% color=190 weight=100 icon="\uf001" block="Ensemble"
-//% groups=['Display', 'MIDI', 'Pins', 'Sync']
+//% groups=['Sync', 'Pins', 'MIDI']
 namespace ensemble {
     let systemStatusTimer = 0;
     let messages: MidiMessage[] = [];
@@ -28,40 +28,6 @@ namespace ensemble {
         serial.setRxBufferSize(64)
         serial.setBaudRate(BaudRate.BaudRate115200)
         serial.redirectToUSB()
-    }
-        
-
-    /**
-     * The microbit will behave as a Conductor in the ensemble
-     */
-    //% block="be a Conductor"
-    //% group="Roles"
-    export function setRoleToConductor(r: EnsembleMember) {
-        role = r;
-        radio.setGroup(Channel.System);
-    }
-
-    /**
-     * The microbit will behave as a Musican in the ensemble
-     */
-    //% block="be a Musician"
-    //% group="Roles"
-    export function setRoleToMusician() {
-        role = EnsembleMember.Musician;
-        channel = Channel.System;
-        radio.setGroup(Channel.System);
-    }
-
-    /**
-     * The microbit will behave as an Instrument in the ensemble
-     */
-    //% block="be an Instrument on band $cb and channel $ch"
-    //% group="Roles"
-    export function setRoleToInstrument(cb: ChannelBand, ch: Channel) {
-        role = EnsembleMember.Instrument;
-        channelBand = cb;
-        channel = ch;
-        radio.setGroup(calculateGroup(channelBand, channel));
     }
 
     function calculateGroup(cb: ChannelBand, ch: Channel) {
@@ -108,3 +74,38 @@ enum STATE {
     ERROR
 }
 let state: STATE = STATE.IDLE;
+
+    
+
+    // /**
+    //  * The microbit will behave as a Conductor in the ensemble
+    //  */
+    // //% block="be a Conductor"
+    // //% group="Roles"
+    // export function setRoleToConductor(r: EnsembleMember) {
+    //     role = r;
+    //     radio.setGroup(Channel.System);
+    // }
+
+    // /**
+    //  * The microbit will behave as a Musican in the ensemble
+    //  */
+    // //% block="be a Musician"
+    // //% group="Roles"
+    // export function setRoleToMusician() {
+    //     role = EnsembleMember.Musician;
+    //     channel = Channel.System;
+    //     radio.setGroup(Channel.System);
+    // }
+
+    // /**
+    //  * The microbit will behave as an Instrument in the ensemble
+    //  */
+    // //% block="be an Instrument on band $cb and channel $ch"
+    // //% group="Roles"
+    // export function setRoleToInstrument(cb: ChannelBand, ch: Channel) {
+    //     role = EnsembleMember.Instrument;
+    //     channelBand = cb;
+    //     channel = ch;
+    //     radio.setGroup(calculateGroup(channelBand, channel));
+    // }

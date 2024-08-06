@@ -1,33 +1,5 @@
 namespace ensemble {
     /*
-     * Delayed digital write pin
-     */
-    //% block="digital write pin $pin to $value after $duration ms"
-    //% duration.defl=40 duration.min=10
-    //% group="Pins"
-    //% color="#b82424"
-    export function delayedDigitalWritePin(pin: DigitalPin, value: number, duration: number) {
-        control.runInParallel(() => {
-            basic.pause(duration);
-            pins.digitalWritePin(pin, value);
-        });
-    }
-
-    /*
-     * Delayed analog write pin
-     */
-    //% block="analog write pin $pin to $value after $duration ms"
-    //% duration.defl=40
-    //% group="Pins"
-    //% color="#b82424"
-    export function delayedAnalogWritePin(pin: AnalogPin, value: number, duration: number) {
-        control.runInParallel(() => {
-            basic.pause(duration);
-            pins.analogWritePin(pin, value);
-        });
-    }
-
-    /*
      * Analog write pin with linear interpolation
      */
     //% block="analog write pin $pin from $from to $to over $duration ms"
@@ -70,5 +42,33 @@ namespace ensemble {
         }
         pins.digitalWritePin(pin, 1);
         delayedDigitalWritePin(pin, 0, sequence[beat % sequence.length]);
+    }
+    
+    /*
+     * Delayed digital write pin
+     */
+    //% block="digital write pin $pin to $value after $duration ms"
+    //% duration.defl=40 duration.min=10
+    //% group="Pins"
+    //% color="#b82424"
+    export function delayedDigitalWritePin(pin: DigitalPin, value: number, duration: number) {
+        control.runInParallel(() => {
+            basic.pause(duration);
+            pins.digitalWritePin(pin, value);
+        });
+    }
+
+    /*
+     * Delayed analog write pin
+     */
+    //% block="analog write pin $pin to $value after $duration ms"
+    //% duration.defl=40
+    //% group="Pins"
+    //% color="#b82424"
+    export function delayedAnalogWritePin(pin: AnalogPin, value: number, duration: number) {
+        control.runInParallel(() => {
+            basic.pause(duration);
+            pins.analogWritePin(pin, value);
+        });
     }
 }
