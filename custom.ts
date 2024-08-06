@@ -8,7 +8,7 @@ enum EnsembleMember {
  * Ensemble action
  */
 //% color=190 weight=100 icon="\uf001" block="Ensemble"
-//% groups=['Sync', 'Pins', 'MIDI']
+//% groups=['MIDI', 'Sync', 'Pins']
 namespace ensemble {
     let systemStatusTimer = 0;
     let messages: MidiMessage[] = [];
