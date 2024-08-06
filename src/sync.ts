@@ -52,7 +52,7 @@ namespace ensemble {
     /*
      * Set time signature
      */
-    //% block="set time signature to $bpb/4"
+    //% block="set time signature to $bpb / 4"
     //% bpb.defl=4 bpb.min=2 bpb.max=16
     //% group="Sync"
     export function setTimeSignature(bpb: number) {

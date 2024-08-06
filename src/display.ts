@@ -68,7 +68,7 @@ namespace ensemble {
     //% block="display received MIDI notes starting at note $note"
     //% note.min=0 note.max=127
     //% note.defl=35
-    //% group="Display"
+    //% group="Advanced"
     export function showReceivedNoteDisplay(note: number) {
         lowestNoteForNoteDisplay = note;
 
@@ -86,7 +86,7 @@ namespace ensemble {
      * NOTE: Only use this in a Musician microbit
      */
     //% block="display sent MIDI notes"
-    //% group="Display"
+    //% group="Advanced"
     export function showSentMidiDisplay() {
         basic.clearScreen();
 
