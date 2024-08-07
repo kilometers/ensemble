@@ -147,8 +147,8 @@ namespace ensemble {
      * Get an external metronome's beat
      * The saved beats are used to sync the internal metronome
      */
-    // % block="sync with external metronome $externalCount"
-    // % group="Sync"
+    //% block="sync with external metronome $externalCount"
+    //% group="Sync"
     export function syncWithExternalMetronome(externalCount: number) {
         externalCountHistory.push({ count: externalCount, time: input.runningTime() });
         if(externalCountHistory.length > 4) {
