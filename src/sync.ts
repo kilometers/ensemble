@@ -24,7 +24,7 @@ namespace ensemble {
         SIXTEENTH = 16
     }
 
-    export let beatHandler: (beat: number, bar :number, beatLength: number) => void = (beat: number, bar :number, beatLength: number) => { };
+    export let beatHandler: (beat: number, bar :number, beatLength: number, count: number) => void = (beat: number, bar :number, beatLength: number, count: number) => { };
     export let count = 0;
     export let beatValue = BeatValue.EIGHTH;
     export let beatsPerBar = 4;
@@ -45,8 +45,8 @@ namespace ensemble {
     //% block="on beat $beat $bar $beatLength"
     //% draggableParameters="reporter"
     //% group="Sync"
-    export function onBeat(handler: (beat: number, bar :number, beatLength: number) => void) {
-        beatHandler = (beat: number, bar :number, beatLength: number) => handler(beat, bar, beatLength);
+    export function onBeat(handler: (beat: number, bar :number, beatLength: number, count: Number) => void) {
+        beatHandler = (beat: number, bar :number, beatLength: number, count: number) => handler(beat, bar, beatLength, count);
     }
 
     /*
@@ -82,7 +82,7 @@ namespace ensemble {
         control.inBackground(() => {
             while (true) {
                 const beat = count % beatsPerBar;
-                beatHandler(beat, Math.floor(count / beatsPerBar), (240000 / beatValue) / tempo);
+                beatHandler(beat, Math.floor(count / beatsPerBar), (240000 / beatValue) / tempo, count);
                 count += 1;
                 basic.pause(((240000 / beatValue) / tempo));
             }
