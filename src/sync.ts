@@ -126,7 +126,9 @@ namespace ensemble {
         const beat = externalCount % beatsPerBar;
         const beatLength = Math.round((input.runningTime() - lastExternalMetronomeTime) / (externalCount - lastExternalMetronomeCount));
         beatHandler(beat, Math.floor(count / beatsPerBar), beatLength, externalCount);
-
+        halfBeatHandler(beat, Math.floor((count * 2) / beatsPerBar), beatLength, count * 2);
+        basic.pause(beatLength / 2);
+        halfBeatHandler(beat, Math.floor((count * 2 + 1) / beatsPerBar), beatLength, count * 2 + 1);
         lastExternalMetronomeCount = externalCount;
         lastExternalMetronomeTime = input.runningTime();
     }
