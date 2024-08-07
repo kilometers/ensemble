@@ -150,6 +150,7 @@ namespace ensemble {
     //% block="sync with external metronome $externalCount"
     //% group="Sync"
     export function syncWithExternalMetronome(externalCount: number) {
+        useExternalBeat = true;
         externalCountHistory.push({ count: externalCount, time: input.runningTime() });
         if(externalCountHistory.length > 4) {
             externalCountHistory.shift();
