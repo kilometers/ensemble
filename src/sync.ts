@@ -42,8 +42,9 @@ namespace ensemble {
     /*
      * On beat callback
      */
-    //% block="on beat $beat $bar $beatLength"
+    //% block="on beat $beat $bar|| $beatLength, $count"
     //% draggableParameters="reporter"
+    //$ expandableArgumentMode="toggle"
     //% group="Sync"
     export function onBeat(handler: (beat: number, bar :number, beatLength: number, count: Number) => void) {
         beatHandler = (beat: number, bar :number, beatLength: number, count: number) => handler(beat, bar, beatLength, count);
@@ -98,7 +99,7 @@ namespace ensemble {
     export function useExternalMetronome(externalCount: number) {
         const beat = externalCount % beatsPerBar;
         const beatLength = Math.round((input.runningTime() - lastExternalMetronomeTime) / (externalCount - lastExternalMetronomeCount));
-        beatHandler(beat, Math.floor(count / beatsPerBar), beatLength);
+        beatHandler(beat, Math.floor(count / beatsPerBar), beatLength, externalCount);
 
         lastExternalMetronomeCount = externalCount;
         lastExternalMetronomeTime = input.runningTime();
