@@ -56,7 +56,7 @@ namespace ensemble {
     //% block="on half beat $beat $bar $beatLength $count"
     //% draggableParameters="reporter"
     //% group="Sync"
-    export function onHalfBeat(handler: (beat: number, bar :number, beatLength: number, count: Number) => void) {
+    export function onHalfBeat(handler: (beat: number, bar :number, beatLength: number, count: number) => void) {
         halfBeatHandler = (beat: number, bar :number, beatLength: number, count: number) => handler(beat, bar, beatLength, count);
     }
 
