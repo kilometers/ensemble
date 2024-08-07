@@ -36,15 +36,14 @@ namespace ensemble {
     // let externalBeatHistory: BeatRecord[] = [];
     // let externalBeatLength = (240000 / beatValue) / tempo;
 
-    basic.pause(((240000 / beatValue) / tempo));;
+    // basic.pause(((240000 / beatValue) / tempo));;
     // let useExternalBeat = false;
     let internalMetronomeStarted = false;
     /*
      * On beat callback
      */
-    //% block="on beat $beat $bar || $beatLength $count"
+    //% block="on beat $beat $bar $beatLength $count"
     //% draggableParameters="reporter"
-    //$ expandableArgumentMode="toggle"
     //% group="Sync"
     export function onBeat(handler: (beat: number, bar :number, beatLength: number, count: Number) => void) {
         beatHandler = (beat: number, bar :number, beatLength: number, count: number) => handler(beat, bar, beatLength, count);
