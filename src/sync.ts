@@ -42,7 +42,7 @@ namespace ensemble {
     /*
      * On beat callback
      */
-    //% block="on beat $beat $bar|| $beatLength, $count"
+    //% block="on beat $beat $bar || $beatLength $count"
     //% draggableParameters="reporter"
     //$ expandableArgumentMode="toggle"
     //% group="Sync"
