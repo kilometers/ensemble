@@ -25,6 +25,7 @@ namespace ensemble {
     }
 
     export let beatHandler: (beat: number, bar :number, beatLength: number, count: number) => void = (beat: number, bar :number, beatLength: number, count: number) => { };
+    export let halfBeatHandler: (beat: number, bar :number, beatLength: number, count: number) => void = (beat: number, bar :number, beatLength: number, count: number) => { };
     export let count = 0;
     export let beatValue = BeatValue.EIGHTH;
     export let beatsPerBar = 4;
@@ -39,6 +40,7 @@ namespace ensemble {
     // basic.pause(((240000 / beatValue) / tempo));;
     // let useExternalBeat = false;
     let internalMetronomeStarted = false;
+
     /*
      * On beat callback
      */
@@ -47,6 +49,16 @@ namespace ensemble {
     //% group="Sync"
     export function onBeat(handler: (beat: number, bar :number, beatLength: number, count: Number) => void) {
         beatHandler = (beat: number, bar :number, beatLength: number, count: number) => handler(beat, bar, beatLength, count);
+    }
+
+    /*
+     * On half beat
+     */
+    //% block="on half beat $beat $bar $beatLength $count"
+    //% draggableParameters="reporter"
+    //% group="Sync"
+    export function onHalfBeat(handler: (beat: number, bar :number, beatLength: number, count: Number) => void) {
+        halfBeatHandler = (beat: number, bar :number, beatLength: number, count: number) => handler(beat, bar, beatLength, count);
     }
 
     /*
@@ -83,8 +95,11 @@ namespace ensemble {
             while (true) {
                 const beat = count % beatsPerBar;
                 beatHandler(beat, Math.floor(count / beatsPerBar), (240000 / beatValue) / tempo, count);
+                halfBeatHandler(beat, Math.floor((count * 2) / beatsPerBar), (240000 / beatValue) / tempo, count);
+                basic.pause(((240000 / beatValue) / tempo) / 2);
+                halfBeatHandler(beat, Math.floor((count * 2 + 1) / beatsPerBar), (240000 / beatValue) / tempo, count);
                 count += 1;
-                basic.pause(((240000 / beatValue) / tempo));
+                basic.pause(((240000 / beatValue) / tempo) / 2);
             }
         });
         internalMetronomeStarted = true;
