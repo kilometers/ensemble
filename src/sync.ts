@@ -3,15 +3,15 @@
  * Maintain an internal tempo while allowing for accepting a sync signal from an external source. Both the internal clock and the external clocks would be sixteenth note based () with no sub-divisions. This is to keep things simple and to allow for easy syncing with other devices. Each micro:bit will ultimately use the internal clock to drive the tempo of the device. The external clock will be used to sync the internal clock, gradually adjusting the internal clock to match the external clock. There should be logic to handle missed packets (meaning missed sync signals)
  */
 
-class BeatRecord {
-    beat: number;
+class CountRecord {
+    count: number;
     time: number;
 }
 
-class BeatPrediction {
-    nextBeat: number;
-    timeToNextBeat: number;
-    averageBeatLength: number;
+class CountPrediction {
+    nextCount: number;
+    timeToNextCount: number;
+    averageCountLength: number;
 }
 
 namespace ensemble {
@@ -34,11 +34,10 @@ namespace ensemble {
     let lastExternalMetronomeTime = 0;
     let lastExternalMetronomeCount = 0;
 
-    // let externalBeatHistory: BeatRecord[] = [];
-    // let externalBeatLength = (240000 / beatValue) / tempo;
+    let externalCountHistory: CountRecord[] = [];
 
     // basic.pause(((240000 / beatValue) / tempo));;
-    // let useExternalBeat = false;
+    let useExternalBeat = false;
     let internalMetronomeStarted = false;
 
     /*
@@ -47,7 +46,7 @@ namespace ensemble {
     //% block="on beat $beat $bar $beatLength $count"
     //% draggableParameters="reporter"
     //% group="Sync"
-    export function onBeat(handler: (beat: number, bar :number, beatLength: number, count: Number) => void) {
+    export function onBeat(handler: (beat: number, bar :number, beatLength: number, count: number) => void) {
         beatHandler = (beat: number, bar :number, beatLength: number, count: number) => handler(beat, bar, beatLength, count);
     }
 
@@ -85,7 +84,6 @@ namespace ensemble {
      * Start the internal metronome
      */
     //% block="start internal metronome"
-    //% c.defl=4 c.min=2
     //% group="Sync"
     export function startInternalMetronome() {
         if (internalMetronomeStarted) {
@@ -93,13 +91,27 @@ namespace ensemble {
         }
         control.inBackground(() => {
             while (true) {
+                let beatLength = ((240000 / beatValue) / tempo);
+                if(useExternalBeat && externalCountHistory.length > 1) {
+                    const prediction = predictNextCount();
+                    if (prediction) {
+                        beatLength = prediction.averageCountLength;
+                        if(prediction.timeToNextCount < prediction.averageCountLength / 2) {
+                            basic.pause(prediction.timeToNextCount);
+                        } else {
+                            beatLength = prediction.averageCountLength - prediction.timeToNextCount;
+                        }
+                    }
+                }
+                
+
                 const beat = count % beatsPerBar;
-                beatHandler(beat, Math.floor(count / beatsPerBar), (240000 / beatValue) / tempo, count);
-                halfBeatHandler(beat, Math.floor((count * 2) / beatsPerBar), (240000 / beatValue) / tempo, count);
-                basic.pause(((240000 / beatValue) / tempo) / 2);
-                halfBeatHandler(beat, Math.floor((count * 2 + 1) / beatsPerBar), (240000 / beatValue) / tempo, count);
+                beatHandler(beat, Math.floor(count / beatsPerBar), beatLength, count);
+                halfBeatHandler(beat, Math.floor((count * 2) / beatsPerBar), beatLength, count);
+                basic.pause(beatLength / 2);
+                halfBeatHandler(beat, Math.floor((count * 2 + 1) / beatsPerBar), beatLength, count);
                 count += 1;
-                basic.pause(((240000 / beatValue) / tempo) / 2);
+                basic.pause(beatLength / 2);
             }
         });
         internalMetronomeStarted = true;
@@ -109,8 +121,8 @@ namespace ensemble {
      * Use external metronome
      * The external signal should simply be an incrementing integer, never repeating
      */
-    //% block="use external metronome with count $externalCount"
-    export function useExternalMetronome(externalCount: number) {
+    //% block="trigger beat with count $externalCount"
+    export function triggerBeatWithCount(externalCount: number) {
         const beat = externalCount % beatsPerBar;
         const beatLength = Math.round((input.runningTime() - lastExternalMetronomeTime) / (externalCount - lastExternalMetronomeCount));
         beatHandler(beat, Math.floor(count / beatsPerBar), beatLength, externalCount);
@@ -133,50 +145,50 @@ namespace ensemble {
      * Get an external metronome's beat
      * The saved beats are used to sync the internal metronome
      */
-    //% block="sync with external metronome $externalBeat"
-    //% group="Sync"
-    // export function syncWithExternalBeat(externalBeat: number) {
-    //     externalBeatHistory.push({ beat: externalBeat, time: input.runningTime() });
-    //     if(externalBeatHistory.length > 4) {
-    //         externalBeatHistory.shift();
-    //     }
-    // }
+    // % block="sync with external metronome $externalCount"
+    // % group="Sync"
+    export function syncWithExternalMetronome(externalCount: number) {
+        externalCountHistory.push({ count: externalCount, time: input.runningTime() });
+        if(externalCountHistory.length > 4) {
+            externalCountHistory.shift();
+        }
+    }
 
     /*
      * Predict the next beat based on the external beat history
      * Should work even if packets have been missed (i.e. the external beat is not perfectly recorded)
      * Since each beat is numbered incrementally, even if a beat is missed (this is coming in over radio) the next beat can be predicted though there may be gaps in the beat history
      */
-    // function predictNextBeat(): BeatPrediction {
-    //     if (externalBeatHistory.length < 2) {
-    //         return null;
-    //     }
+    function predictNextCount(): CountPrediction {
+        if (externalCountHistory.length < 2) {
+            return null;
+        }
 
-    //     let historyTotal = 0;
-    //     let historyCount = 0;
-    //     for(let i = 0; i < externalBeatHistory.length - 1; i++) {
-    //         let current = externalBeatHistory[i];
-    //         let next = externalBeatHistory[i + 1];
+        let historyTotal = 0;
+        let historyCount = 0;
+        for(let i = 0; i < externalCountHistory.length - 1; i++) {
+            let current = externalCountHistory[i];
+            let next = externalCountHistory[i + 1];
 
-    //         let timeDelta = next.time - current.time;
-    //         let beatDelta = next.beat - current.beat;
+            let timeDelta = next.time - current.time;
+            let beatDelta = next.count - current.count;
 
-    //         historyTotal += timeDelta / beatDelta;
-    //         historyCount++;
-    //     }
-    //     const averageBeatLength = historyTotal / historyCount;
-    //     const timeSinceLastBeat = input.runningTime() - externalBeatHistory[externalBeatHistory.length - 1].time;
+            historyTotal += timeDelta / beatDelta;
+            historyCount++;
+        }
+        const averageCountLength = historyTotal / historyCount;
+        const timeSinceLastCount = input.runningTime() - externalCountHistory[externalCountHistory.length - 1].time;
 
-    //     // Should I use ceil or floor here?
-    //     const nextBeat = externalBeatHistory[externalBeatHistory.length - 1].beat + Math.ceil(timeSinceLastBeat / averageBeatLength);
+        // Should I use ceil or floor here?
+        const nextCount = externalCountHistory[externalCountHistory.length - 1].count + Math.ceil(timeSinceLastCount / averageCountLength);
 
-    //     const timeToNextBeat = averageBeatLength - (timeSinceLastBeat % averageBeatLength);
+        const timeToNextCount = averageCountLength - (timeSinceLastCount % averageCountLength);
         
-    //     return {
-    //         nextBeat,
-    //         timeToNextBeat,
-    //         averageBeatLength
-    //     };
-    // }   
+        return {
+            nextCount,
+            timeToNextCount,
+            averageCountLength
+        };
+    }   
         
 }
