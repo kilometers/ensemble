@@ -107,9 +107,9 @@ namespace ensemble {
 
                 const beat = count % beatsPerBar;
                 beatHandler(beat, Math.floor(count / beatsPerBar), beatLength, count);
-                halfBeatHandler(beat, Math.floor((count * 2) / beatsPerBar), beatLength, count);
+                halfBeatHandler(beat, Math.floor((count * 2) / beatsPerBar), beatLength, count * 2);
                 basic.pause(beatLength / 2);
-                halfBeatHandler(beat, Math.floor((count * 2 + 1) / beatsPerBar), beatLength, count);
+                halfBeatHandler(beat, Math.floor((count * 2 + 1) / beatsPerBar), beatLength, count * 2 + 1);
                 count += 1;
                 basic.pause(beatLength / 2);
             }
