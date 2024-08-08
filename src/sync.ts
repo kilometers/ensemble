@@ -42,6 +42,7 @@ namespace ensemble {
 
     // basic.pause(((240000 / beatValue) / tempo));;
     let useExternalCount = false;
+    let predictedExternalCount = 0;
     let internalMetronomeStarted = false;
 
     /*
@@ -108,6 +109,11 @@ namespace ensemble {
                 // Call beat handler
                 beatHandler(beat, Math.floor(internalCount / beatsPerBar), beatLength, internalCount);
 
+                    // Sync internalCount with predictedExternalCount
+                if (predictedExternalCount !== 0) {
+                    internalCount = predictedExternalCount;
+                }
+                
                 internalCount += 1;
 
                 let nextExpectedExternalBeat = calculateNextExpectedExternalBeat();
@@ -202,5 +208,21 @@ namespace ensemble {
         let nextExpectedBeatTime = lastExternal.time + averageBeatDuration * (internalCount - lastExternal.count + 1);
         return nextExpectedBeatTime;
     }
+
+    function predictExternalCount(): void {
+        if (externalCountLog.length < 2) {
+            return;
+        }
+    
+        let averageTempo = calculateAverageTempo();
+        let averageBeatDuration = 60000 / averageTempo;
         
+        let lastExternal = externalCountLog[externalCountLog.length - 1];
+        let currentTime = input.runningTime();
+    
+        // Predict the next external count based on the time elapsed
+        let timeElapsed = currentTime - lastExternal.time;
+        let predictedCountDelta = Math.round(timeElapsed / averageBeatDuration);
+        predictedExternalCount = lastExternal.count + predictedCountDelta;
+    }
 }
