@@ -33,12 +33,15 @@ namespace ensemble {
 
     let lastExternalMetronomeTime = input.runningTime();
     let lastExternalMetronomeCount = 0;
+
+    let externalCountLog: { count: number, time: number }[] = []; // History of external counts
+    let historySize = 4;
     
     let adjustmentFactor = 0.01; // Reduced aggressiveness to prevent oscillation
     let smoothingFactor = 0.9; // For exponential smoothing
 
     // basic.pause(((240000 / beatValue) / tempo));;
-    let useExternalBeat = false;
+    let useExternalCount = false;
     let internalMetronomeStarted = false;
 
     /*
@@ -93,21 +96,20 @@ namespace ensemble {
         control.inBackground(() => {
             while (true) {
                 // Exact sync adjustment based on timing differences
-                let currentTime = input.runningTime();
-                let expectedExternalTime = lastExternalMetronomeTime + (240000 / (beatValue * tempo)) * (lastExternalMetronomeCount - count);
-                let timingDifference = currentTime - expectedExternalTime;
+                let averageTempo = calculateAverageTempo();
 
-                let smoothedDifference = timingDifference * smoothingFactor;
-                
-                tempo -= (smoothedDifference / (240000 / (beatValue * tempo))) * adjustmentFactor;
+                // Adjust tempo towards the average tempo
+                tempo = (tempo * 0.9) + (averageTempo * 0.1);
 
+                // Calculate beat length after tempo adjustment
+                let beatLength = ((240000 / beatValue) / tempo);
                 const beat = count % beatsPerBar;
 
                 // Call beat handler
-                beatHandler(beat, Math.floor(count / beatsPerBar), ((240000 / beatValue) / tempo), count);
+                beatHandler(beat, Math.floor(count / beatsPerBar), beatLength, count);
 
                 // Pause for the beat length
-                basic.pause(((240000 / beatValue) / tempo));
+                basic.pause(beatLength);
                 count += 1;
             }
         });
@@ -123,9 +125,6 @@ namespace ensemble {
         const beat = externalCount % beatsPerBar;
         const beatLength = Math.round((input.runningTime() - lastExternalMetronomeTime) / (externalCount - lastExternalMetronomeCount));
         beatHandler(beat, Math.floor(count / beatsPerBar), beatLength, externalCount);
-        halfBeatHandler(beat, Math.floor((count * 2) / beatsPerBar), beatLength, count * 2);
-        basic.pause(beatLength / 2);
-        halfBeatHandler(beat, Math.floor((count * 2 + 1) / beatsPerBar), beatLength, count * 2 + 1);
         lastExternalMetronomeCount = externalCount;
         lastExternalMetronomeTime = input.runningTime();
     }
@@ -147,9 +146,36 @@ namespace ensemble {
     //% block="sync with external metronome $externalCount"
     //% group="Sync"
     export function syncWithExternalMetronome(externalCount: number) {
-        useExternalBeat = true;
-        lastExternalMetronomeCount = externalCount;
-        lastExternalMetronomeTime = input.runningTime();
+        useExternalCount = true;
+        let currentTime = input.runningTime();
+
+        // Add received count and time to history
+        externalCountLog.push({ count: externalCount, time: currentTime });
+
+        // Ensure the history size does not exceed the limit
+        if (externalCountLog.length > historySize) {
+            externalCountLog.shift();
+        }
+        
+    }
+
+    function calculateAverageTempo(): number {
+        if (useExternalCount && externalCountLog.length < 2) {
+            return tempo; // Not enough data to calculate
+        }
+    
+        let totalDifference = 0;
+        let countDifferences = 0;
+        
+        for (let i = 1; i < externalCountLog.length; i++) {
+            let timeDiff = externalCountLog[i].time - externalCountLog[i - 1].time;
+            let countDiff = externalCountLog[i].count - externalCountLog[i - 1].count;
+            totalDifference += (countDiff / timeDiff) * 60000; // Convert to BPM
+            countDifferences += 1;
+        }
+    
+        // Calculate average tempo based on history
+        return totalDifference / countDifferences;
     }
         
 }
