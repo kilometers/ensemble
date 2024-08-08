@@ -211,7 +211,7 @@ namespace ensemble {
     }
 
     function predictExternalCount(): void {
-        if (externalCountLog.length < 2) {
+        if (!useExternalCount || externalCountLog.length < 2) {
             return;
         }
     
