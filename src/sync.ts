@@ -100,7 +100,7 @@ namespace ensemble {
                 let averageTempo = calculateAverageTempo();
 
                 // Adjust tempo towards the average tempo
-                tempo = (tempo * 0.5) + (averageTempo * 0.5);
+                tempo = (tempo * 0.9) + (averageTempo * 0.1);
 
                 // Calculate beat length after tempo adjustment
                 let beatLength = ((240000 / beatValue) / tempo);
@@ -109,7 +109,7 @@ namespace ensemble {
                 // Call beat handler
                 beatHandler(beat, Math.floor(internalCount / beatsPerBar), beatLength, internalCount);
 
-                predictExternalCount()
+                predictExternalCount();
                 // Sync internalCount with predictedExternalCount
                 if (predictedExternalCount !== 0) {
                     internalCount = predictedExternalCount;
