@@ -31,10 +31,9 @@ namespace ensemble {
     export let beatsPerBar = 4;
     export let tempo = 120;
 
-    let lastExternalMetronomeTime = 0;
+    let lastExternalMetronomeTime = input.runningTime();
     let lastExternalMetronomeCount = 0;
-
-    let externalCountHistory: CountRecord[] = [];
+    let adjustmentFactor = 0.3;
 
     // basic.pause(((240000 / beatValue) / tempo));;
     let useExternalBeat = false;
@@ -91,27 +90,21 @@ namespace ensemble {
         }
         control.inBackground(() => {
             while (true) {
-                let beatLength = ((240000 / beatValue) / tempo);
-                if(useExternalBeat && externalCountHistory.length > 1) {
-                    const prediction = predictNextCount();
-                    if (prediction) {
-                        beatLength = prediction.averageCountLength;
-                        if(prediction.timeToNextCount < prediction.averageCountLength / 2) {
-                            basic.pause(prediction.timeToNextCount);
-                        } else {
-                            beatLength = prediction.averageCountLength - prediction.timeToNextCount;
-                        }
-                    }
-                }
+                // Exact sync adjustment based on timing differences
+                let currentTime = input.runningTime();
+                let expectedExternalTime = lastExternalMetronomeTime + (240000 / (beatValue * tempo)) * (lastExternalMetronomeCount - count);
+                let timingDifference = currentTime - expectedExternalTime;
                 
+                tempo -= (timingDifference / (240000 / (beatValue * tempo))) * adjustmentFactor;
 
                 const beat = count % beatsPerBar;
-                beatHandler(beat, Math.floor(count / beatsPerBar), beatLength, count);
-                halfBeatHandler(beat, Math.floor((count * 2) / beatsPerBar), beatLength, count * 2);
-                basic.pause(beatLength / 2);
-                halfBeatHandler(beat, Math.floor((count * 2 + 1) / beatsPerBar), beatLength, count * 2 + 1);
+
+                // Call beat handler
+                beatHandler(beat, Math.floor(count / beatsPerBar), ((240000 / beatValue) / tempo), count);
+
+                // Pause for the beat length
+                basic.pause(((240000 / beatValue) / tempo));
                 count += 1;
-                basic.pause(beatLength / 2);
             }
         });
         internalMetronomeStarted = true;
@@ -151,47 +144,8 @@ namespace ensemble {
     //% group="Sync"
     export function syncWithExternalMetronome(externalCount: number) {
         useExternalBeat = true;
-        externalCountHistory.push({ count: externalCount, time: input.runningTime() });
-        if(externalCountHistory.length > 4) {
-            externalCountHistory.shift();
-        }
+        lastExternalMetronomeCount = externalCount;
+        lastExternalMetronomeTime = input.runningTime();
     }
-
-    /*
-     * Predict the next beat based on the external beat history
-     * Should work even if packets have been missed (i.e. the external beat is not perfectly recorded)
-     * Since each beat is numbered incrementally, even if a beat is missed (this is coming in over radio) the next beat can be predicted though there may be gaps in the beat history
-     */
-    function predictNextCount(): CountPrediction {
-        if (externalCountHistory.length < 2) {
-            return null;
-        }
-
-        let historyTotal = 0;
-        let historyCount = 0;
-        for(let i = 0; i < externalCountHistory.length - 1; i++) {
-            let current = externalCountHistory[i];
-            let next = externalCountHistory[i + 1];
-
-            let timeDelta = next.time - current.time;
-            let beatDelta = next.count - current.count;
-
-            historyTotal += timeDelta / beatDelta;
-            historyCount++;
-        }
-        const averageCountLength = historyTotal / historyCount;
-        const timeSinceLastCount = input.runningTime() - externalCountHistory[externalCountHistory.length - 1].time;
-
-        // Should I use ceil or floor here?
-        const nextCount = externalCountHistory[externalCountHistory.length - 1].count + Math.ceil(timeSinceLastCount / averageCountLength);
-
-        const timeToNextCount = averageCountLength - (timeSinceLastCount % averageCountLength);
-        
-        return {
-            nextCount,
-            timeToNextCount,
-            averageCountLength
-        };
-    }   
         
 }
