@@ -33,7 +33,9 @@ namespace ensemble {
 
     let lastExternalMetronomeTime = input.runningTime();
     let lastExternalMetronomeCount = 0;
-    let adjustmentFactor = 0.3;
+    
+    let adjustmentFactor = 0.01; // Reduced aggressiveness to prevent oscillation
+    let smoothingFactor = 0.9; // For exponential smoothing
 
     // basic.pause(((240000 / beatValue) / tempo));;
     let useExternalBeat = false;
@@ -94,8 +96,10 @@ namespace ensemble {
                 let currentTime = input.runningTime();
                 let expectedExternalTime = lastExternalMetronomeTime + (240000 / (beatValue * tempo)) * (lastExternalMetronomeCount - count);
                 let timingDifference = currentTime - expectedExternalTime;
+
+                let smoothedDifference = timingDifference * smoothingFactor;
                 
-                tempo -= (timingDifference / (240000 / (beatValue * tempo))) * adjustmentFactor;
+                tempo -= (smoothedDifference / (240000 / (beatValue * tempo))) * adjustmentFactor;
 
                 const beat = count % beatsPerBar;
 
