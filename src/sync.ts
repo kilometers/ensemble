@@ -160,7 +160,7 @@ namespace ensemble {
     }
 
     function calculateAverageTempo(): number {
-        if (useExternalCount && externalCountLog.length < 2) {
+        if (!useExternalCount || externalCountLog.length < 2) {
             return tempo; // Not enough data to calculate
         }
     
