@@ -109,12 +109,13 @@ namespace ensemble {
                 // Call beat handler
                 beatHandler(beat, Math.floor(internalCount / beatsPerBar), beatLength, internalCount);
 
-                    // Sync internalCount with predictedExternalCount
+                predictExternalCount()
+                // Sync internalCount with predictedExternalCount
                 if (predictedExternalCount !== 0) {
                     internalCount = predictedExternalCount;
+                } else {
+                    internalCount += 1;
                 }
-                
-                internalCount += 1;
 
                 let nextExpectedExternalBeat = calculateNextExpectedExternalBeat();
                 let currentTime = input.runningTime();
