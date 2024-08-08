@@ -26,7 +26,7 @@ namespace ensemble {
 
     export let beatHandler: (beat: number, bar :number, beatLength: number, count: number) => void = (beat: number, bar :number, beatLength: number, count: number) => { };
     export let halfBeatHandler: (beat: number, bar :number, beatLength: number, count: number) => void = (beat: number, bar :number, beatLength: number, count: number) => { };
-    export let count = 0;
+    export let internalCount = 0;
     export let beatValue = BeatValue.EIGHTH;
     export let beatsPerBar = 4;
     export let tempo = 120;
@@ -103,14 +103,23 @@ namespace ensemble {
 
                 // Calculate beat length after tempo adjustment
                 let beatLength = ((240000 / beatValue) / tempo);
-                const beat = count % beatsPerBar;
+                const beat = internalCount % beatsPerBar;
 
                 // Call beat handler
-                beatHandler(beat, Math.floor(count / beatsPerBar), beatLength, count);
+                beatHandler(beat, Math.floor(internalCount / beatsPerBar), beatLength, internalCount);
 
-                // Pause for the beat length
-                basic.pause(beatLength);
-                count += 1;
+                internalCount += 1;
+
+                let nextExpectedExternalBeat = calculateNextExpectedExternalBeat();
+                let currentTime = input.runningTime();
+                let timeToNextBeat = nextExpectedExternalBeat - currentTime;
+
+                if (timeToNextBeat > 0) {
+                    basic.pause(timeToNextBeat); // Adjust pause to sync with external beat
+                } else {
+                    // If we're late for the next beat, shorten the pause duration
+                    basic.pause(beatLength + timeToNextBeat);
+                }
             }
         });
         internalMetronomeStarted = true;
@@ -124,7 +133,7 @@ namespace ensemble {
     export function triggerBeatWithCount(externalCount: number) {
         const beat = externalCount % beatsPerBar;
         const beatLength = Math.round((input.runningTime() - lastExternalMetronomeTime) / (externalCount - lastExternalMetronomeCount));
-        beatHandler(beat, Math.floor(count / beatsPerBar), beatLength, externalCount);
+        beatHandler(beat, Math.floor(internalCount / beatsPerBar), beatLength, externalCount);
         lastExternalMetronomeCount = externalCount;
         lastExternalMetronomeTime = input.runningTime();
     }
@@ -176,6 +185,22 @@ namespace ensemble {
     
         // Calculate average tempo based on history
         return totalDifference / countDifferences;
+    }
+
+    function calculateNextExpectedExternalBeat(): number {
+        if (!useExternalCount || externalCountLog.length < 2) {
+            return input.runningTime(); // Not enough data to predict
+        }
+    
+        let lastExternal = externalCountLog[externalCountLog.length - 1];
+        let secondLastExternal = externalCountLog[externalCountLog.length - 2];
+        
+        let timeDiff = lastExternal.time - secondLastExternal.time;
+        let countDiff = lastExternal.count - secondLastExternal.count;
+        let averageBeatDuration = timeDiff / countDiff;
+    
+        let nextExpectedBeatTime = lastExternal.time + averageBeatDuration * (internalCount - lastExternal.count + 1);
+        return nextExpectedBeatTime;
     }
         
 }
