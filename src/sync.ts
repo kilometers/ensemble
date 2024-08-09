@@ -100,7 +100,7 @@ namespace ensemble {
                 let averageTempo = calculateAverageTempo();
 
                 // Adjust tempo towards the average tempo
-                tempo = (tempo * 0.9) + (averageTempo * 0.1);
+                tempo = (tempo * 0.6) + (averageTempo * 0.4);
 
                 // Calculate beat length after tempo adjustment
                 let beatLength = ((240000 / beatValue) / tempo);
