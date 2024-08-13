@@ -226,4 +226,13 @@ namespace ensemble {
         let predictedCountDelta = Math.round(timeElapsed / averageBeatDuration);
         predictedExternalCount = lastExternal.count + predictedCountDelta;
     }
+
+    /*
+     * Reset the internal count
+     */
+    //% block="reset internal count"
+    //% group="Sync"
+    export function resetInternalCount() {
+        internalCount = 0;
+    }
 }
